@@ -5,6 +5,7 @@ export default async function HomePage() {
 
   return (
     <div>
+      <h1 className="text-2xl font-bold">This is the homepage!</h1>
       {posts.map((post) => (
         <div
           key={post.id}
