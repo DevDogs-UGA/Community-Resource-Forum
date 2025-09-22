@@ -20,6 +20,7 @@ next-env.d.ts
 
 # production
 /build
+.turbo
 
 # misc
 .DS_Store
