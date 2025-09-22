@@ -1,0 +1,41 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalEnv": [
+    "MYSQL_PASSWORD",
+    "MYSQL_PORT",
+    "MYSQL_DATABASE",
+    "MYSQL_USER",
+    "MYSQL_HOST",
+    "AUTH_GOOGLE_ID",
+    "AUTH_GOOGLE_SECRET"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["lint:fix", "typecheck"],
+      "outputs": [".next/**"]
+    },
+    "check": {
+      "dependsOn": [],
+      "cache": false
+    },
+    "db:up": {
+      "dependsOn": [],
+      "inputs": ["**/*.env.*"],
+      "cache": false
+    },
+    "db:push": {
+      "dependsOn": ["db:up"],
+      "outputs": ["drizzle/**"]
+    },
+    "db:studio": {
+      "dependsOn": [],
+      "persistent": true,
+      "cache": false
+    },
+    "dev:next": {
+      "dependsOn": ["db:up"],
+      "persistent": true,
+      "cache": false
+    }
+  }
+}

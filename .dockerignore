@@ -1,0 +1,6 @@
+# ignore everything
+**/**
+
+# specific exceptions
+!.env
+!docker-compose.yaml
