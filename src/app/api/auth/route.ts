@@ -1,0 +1,1 @@
+export { handleOAuthRedirect as GET } from "~/auth/server";

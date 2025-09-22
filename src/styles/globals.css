@@ -1,3 +1,5 @@
+@import "./quill.css";
+
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 

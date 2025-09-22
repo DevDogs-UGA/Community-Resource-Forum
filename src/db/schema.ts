@@ -1,27 +1,36 @@
 import { createId } from "@paralleldrive/cuid2";
-import { sql } from "drizzle-orm";
+import { type SQL, sql } from "drizzle-orm";
 import {
-  boolean,
-  check,
   foreignKey,
   index,
   mysqlTable,
   primaryKey,
-  text,
   timestamp,
+  uniqueIndex,
   varchar,
+  type AnyMySqlColumn,
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm/relations";
 
 export const events = mysqlTable("event", (d) => ({
   id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
-  organizerId: d.varchar({ length: 255 }).references(() => profiles.id),
+  organizerId: d
+    .varchar({ length: 255 })
+    .notNull()
+    .references(() => profiles.id),
   title: d.varchar({ length: 255 }).notNull(),
   start: d.datetime().notNull(),
   end: d.datetime().notNull(),
   allDay: d.boolean().notNull(),
   // TODO: add recurrence rules!
   location: d.varchar({ length: 255 }),
+}));
+
+export const eventsRelations = relations(events, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [events.organizerId],
+    references: [profiles.id],
+  }),
 }));
 
 export const posts = mysqlTable(
@@ -34,17 +43,14 @@ export const posts = mysqlTable(
       .notNull()
       .references(() => profiles.id),
     eventId: d.varchar({ length: 255 }).references(() => events.id),
-    createdAt: d
-      .timestamp()
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: d.timestamp().defaultNow().notNull(),
     updatedAt: d.timestamp().onUpdateNow(),
   }),
   (t) => [index("author_idx").on(t.authorId)],
 );
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
-  tagsToPosts: many(tagsToPosts),
+  tags: many(tagsToPosts),
   replies: many(replies),
   author: one(profiles, {
     fields: [posts.authorId],
@@ -60,7 +66,7 @@ export const replies = mysqlTable(
   "reply",
   (d) => ({
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
-    content: d.text(),
+    content: d.text().notNull(),
     authorId: d
       .varchar({ length: 255 })
       .notNull()
@@ -70,10 +76,7 @@ export const replies = mysqlTable(
       .notNull()
       .references(() => posts.id),
     parentId: d.varchar({ length: 255 }),
-    createdAt: d
-      .timestamp()
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: d.timestamp().defaultNow().notNull(),
     updatedAt: d.timestamp().onUpdateNow(),
   }),
   (t) => [
@@ -85,11 +88,17 @@ export const replies = mysqlTable(
   ],
 );
 
-export const repliesRelations = relations(replies, ({ one }) => ({
+export const repliesRelations = relations(replies, ({ one, many }) => ({
   post: one(posts, {
     fields: [replies.postId],
     references: [posts.id],
   }),
+  parent: one(replies, {
+    fields: [replies.parentId],
+    references: [replies.id],
+    relationName: "parent",
+  }),
+  replies: many(replies, { relationName: "replies" }),
   author: one(profiles, {
     fields: [replies.authorId],
     references: [profiles.id],
@@ -111,9 +120,14 @@ export const tags = mysqlTable(
   ],
 );
 
-export const tagsRelations = relations(tags, ({ many }) => ({
-  tagsToPosts: many(tagsToPosts),
-  subscribers: many(usersToTags),
+export const tagsRelations = relations(tags, ({ one, many }) => ({
+  posts: many(tagsToPosts),
+  subscribers: many(subscriptions),
+  parent: one(tags, {
+    fields: [tags.parentId],
+    references: [tags.id],
+  }),
+  children: many(tags),
 }));
 
 export const tagsToPosts = mysqlTable(
@@ -144,10 +158,11 @@ export const tagsToPostsRelations = relations(tagsToPosts, ({ one }) => ({
 
 export const profiles = mysqlTable("profile", (d) => ({
   id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
-  name: d.varchar({ length: 255 }).default("UGA Student"),
-  displayName: d.varchar({ length: 255 }),
+  type: d.mysqlEnum(["user", "organization"]).notNull(),
+  name: d.varchar({ length: 255 }).notNull(),
   image: d.varchar({ length: 255 }),
-  type: d.mysqlEnum(["user", "organization"]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").onUpdateNow(),
 }));
 
 export const profilesRelations = relations(profiles, ({ many }) => ({
@@ -156,43 +171,36 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
   events: many(events),
 }));
 
-/**
- * Everything below this point is carefully configured for better-auth to work. Tread lightly!
- */
+export function lower(email: AnyMySqlColumn): SQL {
+  return sql`(lower(${email}))`;
+}
 
-export const users = mysqlTable("user", (d) => ({
-  id: d
-    .varchar({ length: 255 })
-    .primaryKey()
-    .references(() => profiles.id),
-  /**
-   * @deprecated
-   */
-  name: text("name").notNull(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
-  /**
-   * @deprecated
-   */
-  image: text("image"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
-}));
+export const users = mysqlTable(
+  "user",
+  (d) => ({
+    id: d
+      .varchar({ length: 255 })
+      .primaryKey()
+      .references(() => profiles.id),
+    email: varchar("email", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").onUpdateNow(),
+  }),
+  (t) => [uniqueIndex("email_idx").on(lower(t.email))],
+);
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
     fields: [users.id],
     references: [profiles.id],
   }),
-  subscriptions: many(usersToTags),
+  subscriptions: many(subscriptions),
   organizations: many(organizations),
+  sessions: many(sessions),
 }));
 
-export const usersToTags = mysqlTable(
-  "users_to_tags",
+export const subscriptions = mysqlTable(
+  "subscription",
   (d) => ({
     userId: d
       .varchar({ length: 255 })
@@ -206,79 +214,67 @@ export const usersToTags = mysqlTable(
   (t) => [primaryKey({ columns: [t.userId, t.tagId] })],
 );
 
-export const usersToTagsRelations = relations(usersToTags, ({ one }) => ({
+export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
   user: one(users, {
-    fields: [usersToTags.userId],
+    fields: [subscriptions.userId],
     references: [users.id],
   }),
   tag: one(tags, {
-    fields: [usersToTags.tagId],
+    fields: [subscriptions.tagId],
     references: [tags.id],
   }),
 }));
 
 export const organizations = mysqlTable(
-  "organizations",
+  "organization",
   (d) => ({
-    organization: d
+    organizationId: d
       .varchar({ length: 255 })
       .notNull()
       .references(() => profiles.id),
-    user: d
+    userId: d
       .varchar({ length: 255 })
       .notNull()
-      .references(() => profiles.id),
+      .references(() => users.id),
     role: d.mysqlEnum(["member", "officer", "owner"]),
   }),
   (t) => [
-    primaryKey({ columns: [t.organization, t.user] }),
-    check("profile_is_organization", sql`${t.organization} = 'organization'`),
+    primaryKey({ columns: [t.organizationId, t.userId] }),
+    // TODO: how can we constrain organizationId to profiles only with `profile.type = 'organization'`?
   ],
 );
 
-export const sessions = mysqlTable("session", {
-  id: varchar("id", { length: 255 }).primaryKey().$defaultFn(createId),
-  expiresAt: timestamp("expires_at").notNull(),
-  token: varchar("token", { length: 255 }).notNull().unique(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  userId: varchar("user_id", { length: 255 })
+export const organizationsRelations = relations(organizations, ({ one }) => ({
+  organization: one(profiles, {
+    fields: [organizations.organizationId],
+    references: [profiles.id],
+  }),
+  user: one(users, {
+    fields: [organizations.userId],
+    references: [users.id],
+  }),
+}));
+
+export const sessions = mysqlTable("session", (d) => ({
+  createdAt: d.timestamp().defaultNow().notNull(),
+  userAgent: d.text(),
+  userId: d
+    .varchar({ length: 255 })
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-});
+  token: d
+    .varchar({ length: 255 })
+    .primaryKey()
+    .$defaultFn(() =>
+      Buffer.from(crypto.getRandomValues(new Uint8Array(128))).toString(
+        "base64",
+      ),
+    ),
+}));
 
-export const accounts = mysqlTable("account", {
-  id: varchar("id", { length: 255 }).primaryKey().$defaultFn(createId),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  userId: varchar("user_id", { length: 255 })
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at"),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
-});
-
-export const verifications = mysqlTable("verification", {
-  id: varchar("id", { length: 255 }).primaryKey().$defaultFn(createId),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
-});
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));

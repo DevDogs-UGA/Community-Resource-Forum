@@ -1,6 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
+<<<<<<< HEAD
   "id": "650fb754-4d18-45a0-af87-09c95fcb4d11",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
@@ -127,6 +128,11 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+=======
+  "id": "1de709d3-7a95-4795-8dc3-2542aff0a5ec",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
     "event": {
       "name": "event",
       "columns": {
@@ -141,7 +147,11 @@
           "name": "organizerId",
           "type": "varchar(255)",
           "primaryKey": false,
+<<<<<<< HEAD
           "notNull": false,
+=======
+          "notNull": true,
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           "autoincrement": false
         },
         "title": {
@@ -207,18 +217,31 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+<<<<<<< HEAD
     "organizations": {
       "name": "organizations",
       "columns": {
         "organization": {
           "name": "organization",
+=======
+    "organization": {
+      "name": "organization",
+      "columns": {
+        "organizationId": {
+          "name": "organizationId",
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
+<<<<<<< HEAD
         "user": {
           "name": "user",
+=======
+        "userId": {
+          "name": "userId",
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
@@ -234,12 +257,21 @@
       },
       "indexes": {},
       "foreignKeys": {
+<<<<<<< HEAD
         "organizations_organization_profile_id_fk": {
           "name": "organizations_organization_profile_id_fk",
           "tableFrom": "organizations",
           "tableTo": "profile",
           "columnsFrom": [
             "organization"
+=======
+        "organization_organizationId_profile_id_fk": {
+          "name": "organization_organizationId_profile_id_fk",
+          "tableFrom": "organization",
+          "tableTo": "profile",
+          "columnsFrom": [
+            "organizationId"
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           ],
           "columnsTo": [
             "id"
@@ -247,12 +279,21 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
+<<<<<<< HEAD
         "organizations_user_profile_id_fk": {
           "name": "organizations_user_profile_id_fk",
           "tableFrom": "organizations",
           "tableTo": "profile",
           "columnsFrom": [
             "user"
+=======
+        "organization_userId_user_id_fk": {
+          "name": "organization_userId_user_id_fk",
+          "tableFrom": "organization",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           ],
           "columnsTo": [
             "id"
@@ -262,21 +303,33 @@
         }
       },
       "compositePrimaryKeys": {
+<<<<<<< HEAD
         "organizations_organization_user_pk": {
           "name": "organizations_organization_user_pk",
           "columns": [
             "organization",
             "user"
+=======
+        "organization_organizationId_userId_pk": {
+          "name": "organization_organizationId_userId_pk",
+          "columns": [
+            "organizationId",
+            "userId"
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           ]
         }
       },
       "uniqueConstraints": {},
+<<<<<<< HEAD
       "checkConstraint": {
         "profile_is_organization": {
           "name": "profile_is_organization",
           "value": "`organizations`.`organization` = 'organization'"
         }
       }
+=======
+      "checkConstraint": {}
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
     },
     "post": {
       "name": "post",
@@ -315,7 +368,11 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+<<<<<<< HEAD
           "default": "CURRENT_TIMESTAMP"
+=======
+          "default": "(now())"
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
         },
         "updatedAt": {
           "name": "updatedAt",
@@ -384,10 +441,21 @@
           "notNull": true,
           "autoincrement": false
         },
+<<<<<<< HEAD
+=======
+        "type": {
+          "name": "type",
+          "type": "enum('user','organization')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
+<<<<<<< HEAD
           "notNull": false,
           "autoincrement": false,
           "default": "'UGA Student'"
@@ -397,6 +465,9 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
+=======
+          "notNull": true,
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           "autoincrement": false
         },
         "image": {
@@ -406,12 +477,30 @@
           "notNull": false,
           "autoincrement": false
         },
+<<<<<<< HEAD
         "type": {
           "name": "type",
           "type": "enum('user','organization')",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+=======
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
         }
       },
       "indexes": {},
@@ -441,7 +530,11 @@
           "name": "content",
           "type": "text",
           "primaryKey": false,
+<<<<<<< HEAD
           "notNull": false,
+=======
+          "notNull": true,
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           "autoincrement": false
         },
         "authorId": {
@@ -471,7 +564,11 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
+<<<<<<< HEAD
           "default": "CURRENT_TIMESTAMP"
+=======
+          "default": "(now())"
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
         },
         "updatedAt": {
           "name": "updatedAt",
@@ -546,6 +643,7 @@
     "session": {
       "name": "session",
       "columns": {
+<<<<<<< HEAD
         "id": {
           "name": "id",
           "type": "varchar(255)",
@@ -556,6 +654,26 @@
         "expires_at": {
           "name": "expires_at",
           "type": "timestamp",
+=======
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "userAgent": {
+          "name": "userAgent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "varchar(255)",
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -566,6 +684,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+<<<<<<< HEAD
         },
         "created_at": {
           "name": "created_at",
@@ -602,16 +721,27 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+=======
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
         }
       },
       "indexes": {},
       "foreignKeys": {
+<<<<<<< HEAD
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
+=======
+        "session_userId_user_id_fk": {
+          "name": "session_userId_user_id_fk",
+          "tableFrom": "session",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           ],
           "columnsTo": [
             "id"
@@ -621,6 +751,7 @@
         }
       },
       "compositePrimaryKeys": {
+<<<<<<< HEAD
         "session_id": {
           "name": "session_id",
           "columns": [
@@ -631,11 +762,78 @@
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
+=======
+        "session_token": {
+          "name": "session_token",
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
           "columns": [
             "token"
           ]
         }
       },
+<<<<<<< HEAD
+=======
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "subscription": {
+      "name": "subscription",
+      "columns": {
+        "userId": {
+          "name": "userId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tagId": {
+          "name": "tagId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "subscription_userId_user_id_fk": {
+          "name": "subscription_userId_user_id_fk",
+          "tableFrom": "subscription",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "subscription_tagId_tag_id_fk": {
+          "name": "subscription_tagId_tag_id_fk",
+          "tableFrom": "subscription",
+          "tableTo": "tag",
+          "columnsFrom": [
+            "tagId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "subscription_userId_tagId_pk": {
+          "name": "subscription_userId_tagId_pk",
+          "columns": [
+            "userId",
+            "tagId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
       "checkConstraint": {}
     },
     "tag": {
@@ -766,6 +964,7 @@
           "notNull": true,
           "autoincrement": false
         },
+<<<<<<< HEAD
         "name": {
           "name": "name",
           "type": "text",
@@ -773,6 +972,8 @@
           "notNull": true,
           "autoincrement": false
         },
+=======
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
         "email": {
           "name": "email",
           "type": "varchar(255)",
@@ -780,6 +981,7 @@
           "notNull": true,
           "autoincrement": false
         },
+<<<<<<< HEAD
         "email_verified": {
           "name": "email_verified",
           "type": "boolean",
@@ -795,6 +997,8 @@
           "notNull": false,
           "autoincrement": false
         },
+=======
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -807,12 +1011,29 @@
           "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
+<<<<<<< HEAD
           "notNull": true,
           "autoincrement": false,
           "default": "(now())"
         }
       },
       "indexes": {},
+=======
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true
+        }
+      },
+      "indexes": {
+        "email_idx": {
+          "name": "email_idx",
+          "columns": [
+            "(lower(`email`))"
+          ],
+          "isUnique": true
+        }
+      },
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
       "foreignKeys": {
         "user_id_profile_id_fk": {
           "name": "user_id_profile_id_fk",
@@ -836,6 +1057,7 @@
           ]
         }
       },
+<<<<<<< HEAD
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
@@ -963,6 +1185,8 @@
           ]
         }
       },
+=======
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
       "uniqueConstraints": {},
       "checkConstraint": {}
     }
@@ -975,6 +1199,18 @@
   },
   "internal": {
     "tables": {},
+<<<<<<< HEAD
     "indexes": {}
+=======
+    "indexes": {
+      "email_idx": {
+        "columns": {
+          "(lower(`email`))": {
+            "isExpression": true
+          }
+        }
+      }
+    }
+>>>>>>> 8df20d997cfe3a9bcd4f18438c217eb5bcdb515b
   }
 }

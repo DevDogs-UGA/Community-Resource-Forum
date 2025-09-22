@@ -5,6 +5,16 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  async redirects() {
+    return [
+      {
+        source: "/api/auth/callback/google",
+        destination: "/api/auth",
+        permanent: true
+      }
+    ]
+  }
+};
 
 export default config;

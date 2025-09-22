@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  db:
+    # Use the official MySQL image.
+    image: mysql:8.0
+    ports:
+      - "${MYSQL_PORT}:3306"
+    environment:
+      # These values will be taken from .env;
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    # Ensure that the database is healthy before allowing dependent services to start.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "-puser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Restart the container if it crashes.
+    restart: on-failure:3
+  
+
+# Define the volume for persistent data.
+volumes:
+  db_data:
