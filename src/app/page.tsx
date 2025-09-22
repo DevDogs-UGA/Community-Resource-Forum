@@ -95,5 +95,6 @@ export default async function HomePage() {
         </article>
       ))}
     </div>
+    <p>Test</p>
   );
 }
