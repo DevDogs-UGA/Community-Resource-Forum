@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "479e79da-9da7-4b7d-b81a-ba114b090461",
+  "id": "1de709d3-7a95-4795-8dc3-2542aff0a5ec",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "event": {
@@ -18,7 +18,7 @@
           "name": "organizerId",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "title": {
@@ -84,8 +84,8 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "organizations": {
-      "name": "organizations",
+    "organization": {
+      "name": "organization",
       "columns": {
         "organizationId": {
           "name": "organizationId",
@@ -111,9 +111,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "organizations_organizationId_profile_id_fk": {
-          "name": "organizations_organizationId_profile_id_fk",
-          "tableFrom": "organizations",
+        "organization_organizationId_profile_id_fk": {
+          "name": "organization_organizationId_profile_id_fk",
+          "tableFrom": "organization",
           "tableTo": "profile",
           "columnsFrom": [
             "organizationId"
@@ -124,9 +124,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "organizations_userId_user_id_fk": {
-          "name": "organizations_userId_user_id_fk",
-          "tableFrom": "organizations",
+        "organization_userId_user_id_fk": {
+          "name": "organization_userId_user_id_fk",
+          "tableFrom": "organization",
           "tableTo": "user",
           "columnsFrom": [
             "userId"
@@ -139,8 +139,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "organizations_organizationId_userId_pk": {
-          "name": "organizations_organizationId_userId_pk",
+        "organization_organizationId_userId_pk": {
+          "name": "organization_organizationId_userId_pk",
           "columns": [
             "organizationId",
             "userId"
@@ -148,12 +148,7 @@
         }
       },
       "uniqueConstraints": {},
-      "checkConstraint": {
-        "profile_is_organization": {
-          "name": "profile_is_organization",
-          "value": "`organizations`.`organizationId` = 'organization'"
-        }
-      }
+      "checkConstraint": {}
     },
     "post": {
       "name": "post",
@@ -261,13 +256,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "type": {
           "name": "type",
           "type": "enum('user','organization')",
@@ -275,11 +263,11 @@
           "notNull": true,
           "autoincrement": false
         },
-        "displayName": {
-          "name": "displayName",
+        "name": {
+          "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "image": {
@@ -288,6 +276,22 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "onUpdate": true
         }
       },
       "indexes": {},
@@ -317,7 +321,7 @@
           "name": "content",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "authorId": {
@@ -479,6 +483,65 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+    "subscription": {
+      "name": "subscription",
+      "columns": {
+        "userId": {
+          "name": "userId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tagId": {
+          "name": "tagId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "subscription_userId_user_id_fk": {
+          "name": "subscription_userId_user_id_fk",
+          "tableFrom": "subscription",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "subscription_tagId_tag_id_fk": {
+          "name": "subscription_tagId_tag_id_fk",
+          "tableFrom": "subscription",
+          "tableTo": "tag",
+          "columnsFrom": [
+            "tagId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "subscription_userId_tagId_pk": {
+          "name": "subscription_userId_tagId_pk",
+          "columns": [
+            "userId",
+            "tagId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "tag": {
       "name": "tag",
       "columns": {
@@ -626,10 +689,9 @@
           "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false,
-          "onUpdate": true,
-          "default": "(now())"
+          "onUpdate": true
         }
       },
       "indexes": {
@@ -661,65 +723,6 @@
           "name": "user_id",
           "columns": [
             "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "checkConstraint": {}
-    },
-    "users_to_tags": {
-      "name": "users_to_tags",
-      "columns": {
-        "userId": {
-          "name": "userId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "tagId": {
-          "name": "tagId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "users_to_tags_userId_user_id_fk": {
-          "name": "users_to_tags_userId_user_id_fk",
-          "tableFrom": "users_to_tags",
-          "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "users_to_tags_tagId_tag_id_fk": {
-          "name": "users_to_tags_tagId_tag_id_fk",
-          "tableFrom": "users_to_tags",
-          "tableTo": "tag",
-          "columnsFrom": [
-            "tagId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "users_to_tags_userId_tagId_pk": {
-          "name": "users_to_tags_userId_tagId_pk",
-          "columns": [
-            "userId",
-            "tagId"
           ]
         }
       },

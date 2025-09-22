@@ -1,6 +1,6 @@
-import { db } from "~/server/db";
+import { db } from "~/db";
 import tagsObject from "./tags.json";
-import { tags as tagsTable } from "~/server/db/schema";
+import { tags as tagsTable } from "~/db/schema";
 
 interface Tree {
   [key: string]: Tree;
