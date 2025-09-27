@@ -5,11 +5,12 @@ import * as z from "zod";
 import * as zfd from "zod-form-data";
 import { getSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
-import { posts, tagsToPosts } from "~/server/db/schema";
+import { posts, tags as tagsTable, tagsToPosts } from "~/server/db/schema";
 import Editor from "../../components/Editor";
 import SelectEvent from "../../components/SelectEvent";
 import SelectProfile from "../../components/SelectProfile";
 import SelectTags from "../../components/SelectTags";
+import { asc } from "drizzle-orm";
 
 const schema = zfd.formData({
   authorId: zfd.text(),
@@ -33,7 +34,8 @@ const schema = zfd.formData({
 });
 
 export default async function Draft() {
-  const tags = await db.query.tags.findMany();
+  const tags = await db.select().from(tagsTable).orderBy(asc(tagsTable.lft));
+
   const session = await getSessionUser({
     with: {
       profile: {

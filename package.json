@@ -13,7 +13,7 @@
     "docker:build": "docker-compose create --pull=always --build --remove-orphans",
     "docker:ready": "docker-compose up --build --wait",
     "docker:reset": "docker-compose down -v",
-    "dev": "turbo run dev:next db:studio --continue",
+    "dev": "turbo run dev:next db:studio",
     "dev:next": "next dev --turbo",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",

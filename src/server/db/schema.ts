@@ -125,24 +125,16 @@ export const tags = mysqlTable(
   "tag",
   (d) => ({
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
+    lft: d.int().notNull(),
+    rgt: d.int().notNull(),
+    depth: d.int().notNull(),
     name: d.varchar({ length: 255 }).notNull().unique(),
-    parentId: d.varchar({ length: 255 }),
-  }),
-  (t) => [
-    foreignKey({
-      columns: [t.parentId],
-      foreignColumns: [t.id],
-    }),
-  ],
+  })
 );
 
-export const tagsRelations = relations(tags, ({ one, many }) => ({
+export const tagsRelations = relations(tags, ({ many }) => ({
   posts: many(tagsToPosts),
   subscribers: many(subscriptions),
-  parent: one(tags, {
-    fields: [tags.parentId],
-    references: [tags.id],
-  }),
   children: many(tags),
 }));
 
