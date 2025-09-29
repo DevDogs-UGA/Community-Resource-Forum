@@ -11,13 +11,12 @@ import { getDate } from "date-fns";
 import { useCallback, useId, useState } from "react";
 import {
   PiCalendarBlank,
-  PiCaretDownBold,
   PiCheckBold,
   PiLinkBold,
-  PiMagnifyingGlass,
+  PiMagnifyingGlass
 } from "react-icons/pi";
-import type { events } from "~/server/db/schema";
 import formatEventTime from "~/lib/formatEventTime";
+import type { events } from "~/server/db/schema";
 
 type Event = (typeof events)["$inferSelect"];
 

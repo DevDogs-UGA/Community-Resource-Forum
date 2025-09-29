@@ -7,8 +7,8 @@ import {
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { useCallback, useId, useState } from "react";
-import { PiCaretDownBold, PiCheckBold, PiUsersBold } from "react-icons/pi";
+import { useCallback, useState } from "react";
+import { PiCaretDownBold, PiCheckBold } from "react-icons/pi";
 import Avatar from "~/components/Avatar";
 import type { profiles } from "~/server/db/schema";
 
