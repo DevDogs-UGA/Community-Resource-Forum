@@ -43,7 +43,7 @@ export const posts = mysqlTable(
       .notNull()
       .references(() => profiles.id),
     eventId: d.varchar({ length: 255 }).references(() => events.id),
-    likeCount: d.int().notNull().default(0),
+    score: d.int().notNull().default(0),
     createdAt: d.timestamp().defaultNow().notNull(),
     updatedAt: d.timestamp().onUpdateNow(),
   }),
@@ -52,7 +52,6 @@ export const posts = mysqlTable(
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
   tags: many(tagsToPosts),
-  replies: many(replies),
   author: one(profiles, {
     fields: [posts.authorId],
     references: [profiles.id],
@@ -63,8 +62,8 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   }),
 }));
 
-export const likes = mysqlTable(
-  "like",
+export const votes = mysqlTable(
+  "vote",
   (d) => ({
     userId: d
       .varchar({ length: 255 })
@@ -74,12 +73,13 @@ export const likes = mysqlTable(
       .varchar({ length: 255 })
       .notNull()
       .references(() => posts.id),
+    value: d.mysqlEnum(["up", "down.incorrect", "down.harmful", "down.spam"]).notNull(),
   }),
   (t) => [primaryKey({ columns: [t.userId, t.postId] })],
 );
 
-export const replies = mysqlTable(
-  "reply",
+export const comments = mysqlTable(
+  "comments",
   (d) => ({
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
     content: d.text().notNull(),
@@ -93,7 +93,6 @@ export const replies = mysqlTable(
       .references(() => posts.id),
     parentId: d.varchar({ length: 255 }),
     createdAt: d.timestamp().defaultNow().notNull(),
-    updatedAt: d.timestamp().onUpdateNow(),
   }),
   (t) => [
     foreignKey({
@@ -103,23 +102,6 @@ export const replies = mysqlTable(
     index("author_idx").on(t.authorId),
   ],
 );
-
-export const repliesRelations = relations(replies, ({ one, many }) => ({
-  post: one(posts, {
-    fields: [replies.postId],
-    references: [posts.id],
-  }),
-  parent: one(replies, {
-    fields: [replies.parentId],
-    references: [replies.id],
-    relationName: "parent",
-  }),
-  replies: many(replies, { relationName: "replies" }),
-  author: one(profiles, {
-    fields: [replies.authorId],
-    references: [profiles.id],
-  }),
-}));
 
 export const tags = mysqlTable("tag", (d) => ({
   id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
@@ -172,7 +154,6 @@ export const profiles = mysqlTable("profile", (d) => ({
 
 export const profilesRelations = relations(profiles, ({ many }) => ({
   posts: many(posts),
-  replies: many(replies),
   events: many(events),
 }));
 

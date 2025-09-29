@@ -210,11 +210,11 @@ export default function SelectDateTimeRange({ inputNames }: Props) {
   return (
     <span className="relative mx-auto flex w-full max-w-xl flex-col gap-4">
       <span
-        className="group grid grid-cols-8 items-center gap-1.5 sm:grid-rows-2 data-[allDay='true']:sm:grid-cols-[1fr_min-content_1fr] data-[allDay='true']:sm:grid-rows-1"
-        data-allDay={dateTimeRange?.allDay ?? false}
+        className="group grid grid-cols-8 sm:grid-cols-9 items-center gap-1.5 sm:grid-rows-2 data-[allDay='true']:sm:grid-cols-[1fr_min-content_1fr] data-[allDay='true']:sm:grid-rows-1"
+        data-allday={dateTimeRange?.allDay ?? false}
       >
         <input
-          className="col-span-4 w-full rounded-sm bg-white px-3 py-1 ring ring-gray-400 group-[[data-allDay='true']]:col-span-7 sm:col-span-3 group-[[data-allDay='true']]:sm:col-span-1"
+          className="col-span-4 w-full rounded-sm bg-white px-3 py-1 ring ring-gray-400 group-[[data-allday='true']]:col-span-7 sm:col-span-3 group-[[data-allday='true']]:sm:col-span-1"
           min={normalizeDate(minStartDate)}
           name={inputNames.startDate}
           onChange={handleStartDateChange}
@@ -239,11 +239,11 @@ export default function SelectDateTimeRange({ inputNames }: Props) {
             required
           />
         )}
-        <span className="row-start-2 px-1.5 text-right group-[[data-allDay='true']]:col-start-auto group-[[data-allDay='true']]:text-center sm:col-start-4 group-[[data-allDay='true']]:sm:row-start-1">
+        <span className="row-start-2 px-1.5 text-right group-[[data-allday='true']]:col-start-2 group-[[data-allday='true']]:text-center sm:col-start-4 group-[[data-allday='true']]:sm:row-start-1">
           to
         </span>
         <input
-          className="col-span-4 row-start-2 w-full rounded-sm bg-white px-3 py-1 ring ring-gray-400 group-[[data-allDay='true']]:col-span-7 group-[[data-allDay='true']]:col-start-auto sm:col-span-3 sm:col-start-5 group-[[data-allDay='true']]:sm:col-span-1 group-[[data-allDay='true']]:sm:row-start-auto"
+          className="col-span-4 row-start-2 w-full rounded-sm bg-white px-3 py-1 ring ring-gray-400 group-[[data-allday='true']]:col-span-7 group-[[data-allday='true']]:col-start-auto sm:col-span-3 sm:col-start-5 group-[[data-allday='true']]:sm:col-span-1 group-[[data-allday='true']]:sm:row-start-auto"
           min={normalizeDate(dateTimeRange?.start)}
           name={inputNames.endDate}
           onChange={handleEndDateChange}

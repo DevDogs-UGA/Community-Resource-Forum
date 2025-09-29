@@ -11,13 +11,13 @@ import {
   PiXBold,
 } from "react-icons/pi";
 import Avatar from "~/components/Avatar";
-import LikeButton from "~/components/LikeButton";
+import VoteButton from "~/components/VoteButton";
 import formatEventTime from "~/lib/formatEventTime";
 import { getSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
 import {
   events,
-  likes,
+  votes,
   posts,
   profiles,
   tags,
@@ -28,8 +28,8 @@ interface PostRelation {
   post: typeof posts.$inferSelect;
   author: typeof profiles.$inferSelect;
   event: typeof events.$inferSelect | null;
+  vote: typeof votes.$inferSelect.value | null;
   tags: Map<string, typeof tags.$inferSelect>;
-  liked: boolean;
 }
 
 export default async function HomePage({
@@ -62,7 +62,7 @@ export default async function HomePage({
       post: posts,
       author: profiles,
       event: events,
-      like: likes,
+      vote: votes.value,
       tag: tags,
     })
     .from(posts)
@@ -84,17 +84,17 @@ export default async function HomePage({
     .leftJoin(tags, eq(tagsToPosts.tagId, tags.id))
     .leftJoin(events, eq(posts.eventId, events.id))
     .leftJoin(
-      likes,
-      and(eq(likes.userId, session?.userId ?? ""), eq(likes.postId, posts.id)),
+      votes,
+      and(eq(votes.userId, session?.userId ?? ""), eq(votes.postId, posts.id)),
     )
     .then((queryResponse) =>
-      queryResponse.reduce((results, { post, author, event, like, tag }) => {
+      queryResponse.reduce((results, { post, author, event, vote, tag }) => {
         if (!results.has(post.id)) {
           results.set(post.id, {
             post,
             author,
             event,
-            liked: !!like,
+            vote,
             tags: new Map(),
           });
         }
@@ -140,7 +140,7 @@ export default async function HomePage({
       )}
       {postsResult
         .values()
-        .map(({ post, author, event, liked, tags }) => (
+        .map(({ post, author, event, vote, tags }) => (
           <article
             key={post.id}
             className="rounded-md border border-gray-300 bg-white px-2"
@@ -148,7 +148,7 @@ export default async function HomePage({
             <div className="flex flex-col gap-2 px-2 py-4">
               <div className="flex items-start gap-3">
                 <Link
-                  href={`/users/${author.id}`}
+                  href={`/profile/${author.id}`}
                   className="group flex flex-1 items-center gap-3 text-3xl"
                 >
                   <Avatar {...author} />
@@ -177,7 +177,7 @@ export default async function HomePage({
               {event && (
                 <Link
                   className="mt-3 flex flex-1 items-center gap-3 rounded-sm border border-gray-300 bg-gray-50 px-2 py-1.5 text-xl text-black shadow-xs"
-                  href={`/events/${post.eventId}`}
+                  href={`/event/${post.eventId}`}
                 >
                   <span className="relative">
                     <PiCalendarBlank />
@@ -223,24 +223,26 @@ export default async function HomePage({
                 ))
                 .toArray()}
               <p className="ml-auto block px-2 text-nowrap text-gray-500">
-                Posted {formatDistanceToNowStrict(post.createdAt)} ago
+                {formatDistanceToNowStrict(post.createdAt)} ago
               </p>
             </div>
 
-            <div className="flex justify-between gap-2 border-t border-t-gray-300 px-2 py-3 text-gray-700">
-              <LikeButton
-                postId={post.id}
-                likeCount={post.likeCount}
-                likeStatus={liked}
-              />
-              <button className="flex items-center gap-2 rounded-sm px-2 py-1 leading-none hover:bg-green-100">
+            <div className="flex items-center gap-2 border-t border-t-gray-300 px-2 py-3 text-gray-700">
+              <Link
+                className="flex items-center gap-2 rounded-sm px-2 py-1 leading-none hover:bg-green-100"
+                href={`/discussion/${post.id}`}
+              >
                 <PiChatCircleTextBold />
-                {/* <span className="text-xs font-semibold">33</span> */}
-              </button>
+                <span className="text-xs font-semibold">0</span>
+              </Link>
               <button className="flex items-center gap-2 rounded-sm px-2 py-1 leading-none hover:bg-sky-100">
                 <PiShareFatBold />
                 {/* <span className="text-xs font-semibold">12</span> */}
               </button>
+
+              <div className="ml-auto">
+              <VoteButton postId={post.id} score={post.score} vote={vote} />
+              </div>
             </div>
           </article>
         ))
