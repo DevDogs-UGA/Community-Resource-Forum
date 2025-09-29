@@ -1,16 +1,17 @@
+import { asc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
-import { PiPaperPlaneTiltBold } from "react-icons/pi";
+import { PiPaperPlaneTiltBold, PiUsersBold } from "react-icons/pi";
 import * as z from "zod";
 import * as zfd from "zod-form-data";
+import { id } from "zod/v4/locales";
+import Editor from "~/components/Editor";
+import SelectEvent from "~/components/SelectEvent";
+import SelectProfile from "~/components/SelectProfile";
+import SelectTags from "~/components/SelectTags";
 import { getSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
 import { posts, tags as tagsTable, tagsToPosts } from "~/server/db/schema";
-import Editor from "../../components/Editor";
-import SelectEvent from "../../components/SelectEvent";
-import SelectProfile from "../../components/SelectProfile";
-import SelectTags from "../../components/SelectTags";
-import { asc } from "drizzle-orm";
 
 const schema = zfd.formData({
   authorId: zfd.text(),
@@ -33,7 +34,7 @@ const schema = zfd.formData({
   }),
 });
 
-export default async function Draft() {
+export default async function CreatePost() {
   const tags = await db.select().from(tagsTable).orderBy(asc(tagsTable.lft));
 
   const session = await getSessionUser({
@@ -125,9 +126,18 @@ export default async function Draft() {
     >
       <h1 className="text-2xl font-bold">Create a Post</h1>
 
-      <SelectProfile
-        profiles={[session.user.profile, ...organizationProfiles]}
-      />
+        <div className="flex w-full flex-col gap-2">
+          <label className="mx-auto flex w-full max-w-xl items-center gap-2 font-bold">
+            <PiUsersBold className="-scale-x-100" /> Post as
+          </label>
+
+          <div className="relative -mx-8 bg-gray-200 px-8 py-4">
+            <SelectProfile
+              inputName="authorId"
+              profiles={[session.user.profile, ...organizationProfiles]}
+            />
+          </div>
+        </div>
 
       <SelectTags tags={tags} />
       <Editor />

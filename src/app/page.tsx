@@ -69,9 +69,13 @@ export default async function HomePage({
     .innerJoin(queriedTagRelations, eq(queriedTagRelations.postId, posts.id))
     .innerJoin(queriedTags, eq(queriedTags.id, queriedTagRelations.tagId))
     .groupBy(posts.id, tags.id)
-    .having(and(
-        ...tagsResult.map((tag) => sum(between(queriedTags.lft, tag.lft, tag.rgt))),
-      ))
+    .having(
+      and(
+        ...tagsResult.map((tag) =>
+          sum(between(queriedTags.lft, tag.lft, tag.rgt)),
+        ),
+      ),
+    )
     .orderBy(desc(posts.createdAt))
     .offset(0)
     .limit(20)
@@ -241,6 +245,12 @@ export default async function HomePage({
           </article>
         ))
         .toArray()}
+      {postsResult.size === 0 && (
+        <p className="max-w-prose text-center text-sm text-gray-600">
+          There aren&rsquo;t any posts to display yet. Try signing in and
+          publishing some!
+        </p>
+      )}
     </div>
   );
 }

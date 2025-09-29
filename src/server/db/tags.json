@@ -6,12 +6,11 @@
     "Internships": {},
     "Full-time Jobs": {},
     "Part-time Jobs": {},
-    "Co-ops": {
-      "Fall Semester": {},
-      "Spring Semester": {}
-    }
+    "Co-ops": {}
   },
   "Academics": {
-    "Algorithms (CSCI 4470)": {}
+    "Algorithms (CSCI 4470)": {},
+    "Fall Semester": {},
+    "Spring Semester": {}
   }
 }

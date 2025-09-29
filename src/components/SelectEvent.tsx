@@ -14,6 +14,7 @@ import {
   PiCaretDownBold,
   PiCheckBold,
   PiLinkBold,
+  PiMagnifyingGlass,
 } from "react-icons/pi";
 import type { events } from "~/server/db/schema";
 import formatEventTime from "~/lib/formatEventTime";
@@ -57,15 +58,15 @@ export default function SelectEvent({ events }: Props) {
         >
           <div className="relative max-w-xl mx-auto w-full">
             <ComboboxInput
-              className="w-full rounded-sm bg-white py-1 pr-10 pl-3 ring ring-gray-400"
+              className="w-full rounded-sm bg-white py-1 pl-10 pr-3 ring ring-gray-400"
               id="select-profile-combobox-input"
               onChange={(event) => setQuery(event.target.value)}
               displayValue={(p: Event | null) => p?.title ?? ""}
               placeholder="Search your events..."
             />
 
-            <ComboboxButton className="group absolute inset-y-0 right-0 px-3">
-              <PiCaretDownBold className="size-4 fill-black/60 group-data-hover:fill-black" />
+            <ComboboxButton className="group absolute inset-y-0 left-0 px-3">
+              <PiMagnifyingGlass className="size-4 fill-black/60 group-data-hover:fill-black" />
             </ComboboxButton>
           </div>
 

@@ -109,7 +109,6 @@ export async function handleOAuthRedirect(request: NextRequest) {
     notFound();
   }
 
-  console.log(insertedSession.token);
   (await cookies()).set("session", insertedSession.token);
   redirect("/");
 }

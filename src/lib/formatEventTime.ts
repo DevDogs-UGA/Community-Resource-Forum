@@ -14,7 +14,7 @@ type Event = (typeof events)["$inferSelect"];
 export default function formatEventTime(event: Event) {
   return isSameDay(event.start, event.end)
     ? event.allDay
-      ? `${formatDistanceToNow(event.start)} (${format(event.start, "EEE, MMM. d") + (isBefore(event.end, addYears(Date.now(), 1)) ? ", " + getYear(event.end) : "")})`
+      ? `${isSameDay(event.start, Date.now()) ? "Today" : formatDistanceToNow(event.start)} (${format(event.start, "EEE, MMM. d") + (isBefore(event.end, addYears(Date.now(), 1)) ? ", " + getYear(event.end) : "")})`
       : format(event.start, "h:mm") +
         format(event.end, "\u200B-h:mm aa, EEE, MMM. d") +
         (isBefore(event.end, addYears(Date.now(), 1))

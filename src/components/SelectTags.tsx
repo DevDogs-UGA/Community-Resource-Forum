@@ -22,8 +22,6 @@ export default function SelectTags({ tags }: Props) {
   const [selected, setSelected] = useState<Tag[]>([]);
   const id = useId();
 
-  console.log(tags);
-
   const queryResults = useMemo(
     () =>
       tags.filter(

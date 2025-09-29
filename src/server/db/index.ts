@@ -3,6 +3,7 @@ import { createPool, type Pool } from "mysql2/promise";
 import { env } from "~/env";
 import * as schema from "./schema";
 import tags from "./tags.json";
+import { sql } from "drizzle-orm";
 
 interface Tree {
   [key: string]: Tree;
@@ -56,20 +57,18 @@ async function getDB() {
   }
 
   if (!globalForDb.conn) {
-    const {
-      tags: _tags,
-      subscriptions: _subscriptions,
-      tagsToPosts: _tagsToPosts,
-      ...rest
-    } = schema;
-
-    // await seed(db, rest).catch((e) => {
-    //   console.warn("Database already seeded.");
-    // });
-
     await db
       .insert(schema.tags)
       .values(buildNestedSet(tags))
+      .onDuplicateKeyUpdate({
+        set: {
+          id: sql`id`,
+          name: sql`name`,
+          lft: sql`values(${schema.tags.lft})`,
+          rgt: sql`values(${schema.tags.rgt})`,
+          depth: sql`values(${schema.tags.depth})`,
+        },
+      })
       .catch(() => {
         console.warn("Database already seeded.");
       });
