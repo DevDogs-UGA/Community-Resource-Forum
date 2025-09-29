@@ -91,7 +91,7 @@ export default async function CreateEvent() {
       ? parse(dateTime.endTime, "HH:mm", dateTime.endDate)
       : dateTime.endDate;
 
-    if (isBefore(Date.now(), start) || isBefore(end, start)) {
+    if (isBefore(start, new Date()) || isBefore(end, start)) {
       console.error(
         "Start date must be before the current date and the end date.",
       );
