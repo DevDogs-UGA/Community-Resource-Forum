@@ -30,7 +30,7 @@ export default function LikeButton({ postId, ...defaultState }: Props) {
       <input className="hidden" type="hidden" name="postId" value={postId} />
 
       <button
-        className="flex items-center gap-2 rounded-sm px-2 py-1 group leading-none hover:bg-rose-100"
+        className="group flex items-center gap-2 rounded-sm px-2 py-1 leading-none hover:bg-rose-100"
         data-active={optimisticState.likeStatus}
         type="submit"
       >

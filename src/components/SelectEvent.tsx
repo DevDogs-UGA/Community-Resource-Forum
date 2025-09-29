@@ -43,7 +43,10 @@ export default function SelectEvent({ events }: Props) {
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <label className="flex items-center gap-2 font-bold max-w-xl mx-auto w-full" htmlFor={id}>
+      <label
+        className="mx-auto flex w-full max-w-xl items-center gap-2 font-bold"
+        htmlFor={id}
+      >
         <PiLinkBold /> Attach an Event
       </label>
 
@@ -56,9 +59,9 @@ export default function SelectEvent({ events }: Props) {
           onChange={updateSelection}
           onClose={() => setQuery("")}
         >
-          <div className="relative max-w-xl mx-auto w-full">
+          <div className="relative mx-auto w-full max-w-xl">
             <ComboboxInput
-              className="w-full rounded-sm bg-white py-1 pl-10 pr-3 ring ring-gray-400"
+              className="w-full rounded-sm bg-white py-1 pr-3 pl-10 ring ring-gray-400"
               id="select-profile-combobox-input"
               onChange={(event) => setQuery(event.target.value)}
               displayValue={(p: Event | null) => p?.title ?? ""}

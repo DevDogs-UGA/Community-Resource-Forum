@@ -63,12 +63,8 @@
           "name": "event_organizerId_profile_id_fk",
           "tableFrom": "event",
           "tableTo": "profile",
-          "columnsFrom": [
-            "organizerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organizerId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -76,9 +72,7 @@
       "compositePrimaryKeys": {
         "event_id": {
           "name": "event_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -108,12 +102,8 @@
           "name": "like_userId_user_id_fk",
           "tableFrom": "like",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -121,12 +111,8 @@
           "name": "like_postId_post_id_fk",
           "tableFrom": "like",
           "tableTo": "post",
-          "columnsFrom": [
-            "postId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["postId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -134,10 +120,7 @@
       "compositePrimaryKeys": {
         "like_userId_postId_pk": {
           "name": "like_userId_postId_pk",
-          "columns": [
-            "userId",
-            "postId"
-          ]
+          "columns": ["userId", "postId"]
         }
       },
       "uniqueConstraints": {},
@@ -174,12 +157,8 @@
           "name": "organization_organizationId_profile_id_fk",
           "tableFrom": "organization",
           "tableTo": "profile",
-          "columnsFrom": [
-            "organizationId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["organizationId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -187,12 +166,8 @@
           "name": "organization_userId_user_id_fk",
           "tableFrom": "organization",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -200,10 +175,7 @@
       "compositePrimaryKeys": {
         "organization_organizationId_userId_pk": {
           "name": "organization_organizationId_userId_pk",
-          "columns": [
-            "organizationId",
-            "userId"
-          ]
+          "columns": ["organizationId", "userId"]
         }
       },
       "uniqueConstraints": {},
@@ -268,9 +240,7 @@
       "indexes": {
         "author_idx": {
           "name": "author_idx",
-          "columns": [
-            "authorId"
-          ],
+          "columns": ["authorId"],
           "isUnique": false
         }
       },
@@ -279,12 +249,8 @@
           "name": "post_authorId_profile_id_fk",
           "tableFrom": "post",
           "tableTo": "profile",
-          "columnsFrom": [
-            "authorId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["authorId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -292,12 +258,8 @@
           "name": "post_eventId_event_id_fk",
           "tableFrom": "post",
           "tableTo": "event",
-          "columnsFrom": [
-            "eventId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["eventId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -305,9 +267,7 @@
       "compositePrimaryKeys": {
         "post_id": {
           "name": "post_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -366,9 +326,7 @@
       "compositePrimaryKeys": {
         "profile_id": {
           "name": "profile_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -432,9 +390,7 @@
       "indexes": {
         "author_idx": {
           "name": "author_idx",
-          "columns": [
-            "authorId"
-          ],
+          "columns": ["authorId"],
           "isUnique": false
         }
       },
@@ -443,12 +399,8 @@
           "name": "reply_authorId_profile_id_fk",
           "tableFrom": "reply",
           "tableTo": "profile",
-          "columnsFrom": [
-            "authorId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["authorId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -456,12 +408,8 @@
           "name": "reply_postId_post_id_fk",
           "tableFrom": "reply",
           "tableTo": "post",
-          "columnsFrom": [
-            "postId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["postId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -469,12 +417,8 @@
           "name": "reply_parentId_reply_id_fk",
           "tableFrom": "reply",
           "tableTo": "reply",
-          "columnsFrom": [
-            "parentId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parentId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -482,9 +426,7 @@
       "compositePrimaryKeys": {
         "reply_id": {
           "name": "reply_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -529,12 +471,8 @@
           "name": "session_userId_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -542,9 +480,7 @@
       "compositePrimaryKeys": {
         "session_token": {
           "name": "session_token",
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "uniqueConstraints": {},
@@ -574,12 +510,8 @@
           "name": "subscription_userId_user_id_fk",
           "tableFrom": "subscription",
           "tableTo": "user",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -587,12 +519,8 @@
           "name": "subscription_tagId_tag_id_fk",
           "tableFrom": "subscription",
           "tableTo": "tag",
-          "columnsFrom": [
-            "tagId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tagId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -600,10 +528,7 @@
       "compositePrimaryKeys": {
         "subscription_userId_tagId_pk": {
           "name": "subscription_userId_tagId_pk",
-          "columns": [
-            "userId",
-            "tagId"
-          ]
+          "columns": ["userId", "tagId"]
         }
       },
       "uniqueConstraints": {},
@@ -653,17 +578,13 @@
       "compositePrimaryKeys": {
         "tag_id": {
           "name": "tag_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "tag_name_unique": {
           "name": "tag_name_unique",
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "checkConstraint": {}
@@ -692,12 +613,8 @@
           "name": "tags_to_posts_tagId_tag_id_fk",
           "tableFrom": "tags_to_posts",
           "tableTo": "tag",
-          "columnsFrom": [
-            "tagId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tagId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -705,12 +622,8 @@
           "name": "tags_to_posts_postId_post_id_fk",
           "tableFrom": "tags_to_posts",
           "tableTo": "post",
-          "columnsFrom": [
-            "postId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["postId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -718,10 +631,7 @@
       "compositePrimaryKeys": {
         "tags_to_posts_tagId_postId_pk": {
           "name": "tags_to_posts_tagId_postId_pk",
-          "columns": [
-            "tagId",
-            "postId"
-          ]
+          "columns": ["tagId", "postId"]
         }
       },
       "uniqueConstraints": {},
@@ -764,9 +674,7 @@
       "indexes": {
         "email_idx": {
           "name": "email_idx",
-          "columns": [
-            "(lower(`email`))"
-          ],
+          "columns": ["(lower(`email`))"],
           "isUnique": true
         }
       },
@@ -775,12 +683,8 @@
           "name": "user_id_profile_id_fk",
           "tableFrom": "user",
           "tableTo": "profile",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -788,9 +692,7 @@
       "compositePrimaryKeys": {
         "user_id": {
           "name": "user_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},

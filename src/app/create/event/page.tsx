@@ -90,7 +90,7 @@ export default async function CreateEvent() {
     const end = !dateTime.allDay
       ? parse(dateTime.endTime, "HH:mm", dateTime.endDate)
       : dateTime.endDate;
-      
+
     if (isBefore(Date.now(), start) || isBefore(end, start)) {
       console.error(
         "Start date must be before the current date and the end date.",

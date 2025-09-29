@@ -9,7 +9,7 @@ export default function Avatar(profile: (typeof profiles)["$inferSelect"]) {
         className="size-full rounded-[inherit] object-cover"
         src={profile.image ?? undefined}
       />
-      <Fallback className="font-bold text-gray-900 text-[0.5em]">
+      <Fallback className="text-[0.5em] font-bold text-gray-900">
         {profile.name
           ?.split(" ")
           .map((name) => name.substring(0, 1))

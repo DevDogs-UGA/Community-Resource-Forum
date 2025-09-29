@@ -121,16 +121,13 @@ export const repliesRelations = relations(replies, ({ one, many }) => ({
   }),
 }));
 
-export const tags = mysqlTable(
-  "tag",
-  (d) => ({
-    id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
-    lft: d.int().notNull(),
-    rgt: d.int().notNull(),
-    depth: d.int().notNull(),
-    name: d.varchar({ length: 255 }).notNull().unique(),
-  })
-);
+export const tags = mysqlTable("tag", (d) => ({
+  id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
+  lft: d.int().notNull(),
+  rgt: d.int().notNull(),
+  depth: d.int().notNull(),
+  name: d.varchar({ length: 255 }).notNull().unique(),
+}));
 
 export const tagsRelations = relations(tags, ({ many }) => ({
   posts: many(tagsToPosts),

@@ -126,18 +126,18 @@ export default async function CreatePost() {
     >
       <h1 className="text-2xl font-bold">Create a Post</h1>
 
-        <div className="flex w-full flex-col gap-2">
-          <label className="mx-auto flex w-full max-w-xl items-center gap-2 font-bold">
-            <PiUsersBold className="-scale-x-100" /> Post as
-          </label>
+      <div className="flex w-full flex-col gap-2">
+        <label className="mx-auto flex w-full max-w-xl items-center gap-2 font-bold">
+          <PiUsersBold className="-scale-x-100" /> Post as
+        </label>
 
-          <div className="relative -mx-8 bg-gray-200 px-8 py-4">
-            <SelectProfile
-              inputName="authorId"
-              profiles={[session.user.profile, ...organizationProfiles]}
-            />
-          </div>
+        <div className="relative -mx-8 bg-gray-200 px-8 py-4">
+          <SelectProfile
+            inputName="authorId"
+            profiles={[session.user.profile, ...organizationProfiles]}
+          />
         </div>
+      </div>
 
       <SelectTags tags={tags} />
       <Editor />

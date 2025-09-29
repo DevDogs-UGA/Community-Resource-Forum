@@ -26,14 +26,14 @@ export default function Editor() {
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <label className="flex items-center gap-2 font-bold max-w-xl mx-auto w-full">
+      <label className="mx-auto flex w-full max-w-xl items-center gap-2 font-bold">
         <PiPencilSimpleBold /> Content
       </label>
-      
-      <div className="relative bg-gray-200 px-8 py-4 -mx-8">
+
+      <div className="relative -mx-8 bg-gray-200 px-8 py-4">
         <input type="hidden" name="content" value={value} readOnly />
         <ReactQuill
-          className="flex h-64 flex-col rounded-sm border border-gray-400 ring ring-transparent focus-within:ring-sky-600 bg-white shadow-xs max-w-xl mx-auto w-full"
+          className="mx-auto flex h-64 w-full max-w-xl flex-col rounded-sm border border-gray-400 bg-white shadow-xs ring ring-transparent focus-within:ring-sky-600"
           theme="snow"
           onChange={handleChange}
         />
