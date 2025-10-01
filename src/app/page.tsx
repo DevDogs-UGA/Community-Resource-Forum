@@ -17,8 +17,8 @@ import { getSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
 import {
   events,
-  votes,
   posts,
+  postVotes,
   profiles,
   tags,
   tagsToPosts,
@@ -28,7 +28,7 @@ interface PostRelation {
   post: typeof posts.$inferSelect;
   author: typeof profiles.$inferSelect;
   event: typeof events.$inferSelect | null;
-  vote: typeof votes.$inferSelect.value | null;
+  vote: typeof postVotes.$inferSelect.value | null;
   tags: Map<string, typeof tags.$inferSelect>;
 }
 
@@ -62,7 +62,7 @@ export default async function HomePage({
       post: posts,
       author: profiles,
       event: events,
-      vote: votes.value,
+      vote: postVotes.value,
       tag: tags,
     })
     .from(posts)
@@ -84,8 +84,8 @@ export default async function HomePage({
     .leftJoin(tags, eq(tagsToPosts.tagId, tags.id))
     .leftJoin(events, eq(posts.eventId, events.id))
     .leftJoin(
-      votes,
-      and(eq(votes.userId, session?.userId ?? ""), eq(votes.postId, posts.id)),
+      postVotes,
+      and(eq(postVotes.userId, session?.userId ?? ""), eq(postVotes.postId, posts.id)),
     )
     .then((queryResponse) =>
       queryResponse.reduce((results, { post, author, event, vote, tag }) => {

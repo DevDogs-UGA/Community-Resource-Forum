@@ -4,8 +4,7 @@ import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import { PiPaperPlaneTiltBold, PiUsersBold } from "react-icons/pi";
 import * as z from "zod";
 import * as zfd from "zod-form-data";
-import { id } from "zod/v4/locales";
-import Editor from "~/components/Editor";
+import PostEditor from "~/components/PostEditor";
 import SelectEvent from "~/components/SelectEvent";
 import SelectProfile from "~/components/SelectProfile";
 import SelectTags from "~/components/SelectTags";
@@ -140,7 +139,7 @@ export default async function CreatePost() {
       </div>
 
       <SelectTags tags={tags} />
-      <Editor />
+      <PostEditor />
       <SelectEvent events={events} />
 
       <button className="flex items-center gap-3 rounded-sm border-b-2 border-sky-900 bg-sky-800 px-6 py-1 text-lg font-medium text-white shadow-sm ring-1 ring-sky-950 transition-colors hover:bg-sky-50 hover:text-sky-800 focus:mt-0.5 focus:border-b-0">

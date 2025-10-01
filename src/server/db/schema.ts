@@ -1,8 +1,9 @@
 import { createId } from "@paralleldrive/cuid2";
-import { type SQL, sql } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
 import {
   foreignKey,
   index,
+  mysqlEnum,
   mysqlTable,
   primaryKey,
   timestamp,
@@ -44,6 +45,7 @@ export const posts = mysqlTable(
       .references(() => profiles.id),
     eventId: d.varchar({ length: 255 }).references(() => events.id),
     score: d.int().notNull().default(0),
+    commentCount: d.int().notNull().default(0),
     createdAt: d.timestamp().defaultNow().notNull(),
     updatedAt: d.timestamp().onUpdateNow(),
   }),
@@ -60,10 +62,19 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
     fields: [posts.eventId],
     references: [events.id],
   }),
+  votes: many(postVotes),
+  comments: many(comments),
 }));
 
-export const votes = mysqlTable(
-  "vote",
+export const voteValue = mysqlEnum([
+  "up",
+  "down.incorrect",
+  "down.harmful",
+  "down.spam",
+]);
+
+export const postVotes = mysqlTable(
+  "postVote",
   (d) => ({
     userId: d
       .varchar({ length: 255 })
@@ -73,16 +84,25 @@ export const votes = mysqlTable(
       .varchar({ length: 255 })
       .notNull()
       .references(() => posts.id),
-    value: d.mysqlEnum(["up", "down.incorrect", "down.harmful", "down.spam"]).notNull(),
+    value: voteValue.notNull(),
   }),
   (t) => [primaryKey({ columns: [t.userId, t.postId] })],
 );
+
+export const postVotesRelations = relations(postVotes, ({ one }) => ({
+  post: one(posts, {
+    fields: [postVotes.postId],
+    references: [posts.id],
+  }),
+}));
 
 export const comments = mysqlTable(
   "comments",
   (d) => ({
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
     content: d.text().notNull(),
+    score: d.int().notNull().default(0),
+    depth: d.int().notNull(),
     authorId: d
       .varchar({ length: 255 })
       .notNull()
@@ -91,6 +111,7 @@ export const comments = mysqlTable(
       .varchar({ length: 255 })
       .notNull()
       .references(() => posts.id),
+    replyCount: d.int().notNull().default(0),
     parentId: d.varchar({ length: 255 }),
     createdAt: d.timestamp().defaultNow().notNull(),
   }),
@@ -102,6 +123,47 @@ export const comments = mysqlTable(
     index("author_idx").on(t.authorId),
   ],
 );
+
+export const commentRelations = relations(comments, ({ one, many }) => ({
+  author: one(profiles, {
+    fields: [comments.authorId],
+    references: [profiles.id],
+  }),
+  post: one(posts, {
+    fields: [comments.postId],
+    references: [posts.id],
+  }),
+  votes: many(commentVotes),
+  replies: many(comments, { relationName: "replies" }),
+  parent: one(comments, {
+    relationName: "replies",
+    fields: [comments.parentId],
+    references: [comments.id],
+  }),
+}));
+
+export const commentVotes = mysqlTable(
+  "commentVote",
+  (d) => ({
+    userId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => users.id),
+    commentId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => comments.id),
+    value: voteValue.notNull(),
+  }),
+  (t) => [primaryKey({ columns: [t.userId, t.commentId] })],
+);
+
+export const commentVotesRelations = relations(commentVotes, ({ one }) => ({
+  comment: one(comments, {
+    fields: [commentVotes.commentId],
+    references: [comments.id],
+  }),
+}));
 
 export const tags = mysqlTable("tag", (d) => ({
   id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),

@@ -5,12 +5,12 @@ import * as z from "zod";
 import * as zfd from "zod-form-data";
 import { getSessionUser } from "../auth";
 import { db } from "../db";
-import { posts, votes } from "../db/schema";
+import { posts, postVotes } from "../db/schema";
 import signIn from "./signIn";
 
 interface PrevState {
   score: number;
-  vote: typeof votes.$inferSelect.value | null;
+  vote: typeof postVotes.$inferSelect.value | null;
 }
 
 const schema = zfd.formData({
@@ -44,25 +44,25 @@ export default async function vote(prevState: PrevState, formData: FormData) {
   return await db.transaction(async (tx) => {
     const [existingVote] = await tx
       .select()
-      .from(votes)
-      .where(and(eq(votes.postId, postId), eq(votes.userId, session.userId)))
+      .from(postVotes)
+      .where(and(eq(postVotes.postId, postId), eq(postVotes.userId, session.userId)))
       .limit(1);
 
     const newVote = vote !== existingVote?.value ? vote : null;
 
     if (newVote) {
       await tx
-        .insert(votes)
+        .insert(postVotes)
         .values({ postId, userId: session.userId, value: newVote })
         .onDuplicateKeyUpdate({
           set: {
-            value: sql`values(${votes.value})`,
+            value: sql`values(${postVotes.value})`,
           },
         });
     } else {
       await tx
-        .delete(votes)
-        .where(and(eq(votes.postId, postId), eq(votes.userId, session.userId)));
+        .delete(postVotes)
+        .where(and(eq(postVotes.postId, postId), eq(postVotes.userId, session.userId)));
     }
 
     const difference = valueOf(newVote) - valueOf(existingVote?.value);

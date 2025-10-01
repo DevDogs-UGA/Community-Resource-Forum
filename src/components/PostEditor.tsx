@@ -9,7 +9,7 @@ import type { EmitterSource } from "react-quill-new";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
-export default function Editor() {
+export default function PostEditor() {
   const [value, setValue] = useState("{}");
 
   const handleChange = useCallback(
