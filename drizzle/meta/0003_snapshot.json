@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "be2c698b-a2a0-4185-8958-d9092b7e915a",
-  "prevId": "e119311e-1519-4bef-925c-6f2081ee2d83",
+  "id": "01e43850-9bb6-4314-ac13-45030e00c557",
+  "prevId": "be2c698b-a2a0-4185-8958-d9092b7e915a",
   "tables": {
     "event": {
       "name": "event",
@@ -544,33 +544,30 @@
           "notNull": true,
           "autoincrement": false
         },
+        "lft": {
+          "name": "lft",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "rgt": {
+          "name": "rgt",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "parentId": {
-          "name": "parentId",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "tag_parentId_tag_id_fk": {
-          "name": "tag_parentId_tag_id_fk",
-          "tableFrom": "tag",
-          "tableTo": "tag",
-          "columnsFrom": ["parentId"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {
         "tag_id": {
           "name": "tag_id",
@@ -699,9 +696,7 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {
-      "\"post\".\"likes\"": "\"post\".\"likeCount\""
-    }
+    "columns": {}
   },
   "internal": {
     "tables": {},

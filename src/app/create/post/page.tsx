@@ -1,15 +1,16 @@
+import { asc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
-import { PiPaperPlaneTiltBold } from "react-icons/pi";
+import { PiPaperPlaneTiltBold, PiUsersBold } from "react-icons/pi";
 import * as z from "zod";
 import * as zfd from "zod-form-data";
+import PostEditor from "~/components/PostEditor";
+import SelectEvent from "~/components/SelectEvent";
+import SelectProfile from "~/components/SelectProfile";
+import SelectTags from "~/components/SelectTags";
 import { getSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
-import { posts, tagsToPosts } from "~/server/db/schema";
-import Editor from "../../components/Editor";
-import SelectEvent from "../../components/SelectEvent";
-import SelectProfile from "../../components/SelectProfile";
-import SelectTags from "../../components/SelectTags";
+import { posts, tags as tagsTable, tagsToPosts } from "~/server/db/schema";
 
 const schema = zfd.formData({
   authorId: zfd.text(),
@@ -32,8 +33,9 @@ const schema = zfd.formData({
   }),
 });
 
-export default async function Draft() {
-  const tags = await db.query.tags.findMany();
+export default async function CreatePost() {
+  const tags = await db.select().from(tagsTable).orderBy(asc(tagsTable.lft));
+
   const session = await getSessionUser({
     with: {
       profile: {
@@ -123,12 +125,21 @@ export default async function Draft() {
     >
       <h1 className="text-2xl font-bold">Create a Post</h1>
 
-      <SelectProfile
-        profiles={[session.user.profile, ...organizationProfiles]}
-      />
+      <div className="flex w-full flex-col gap-2">
+        <label className="mx-auto flex w-full max-w-xl items-center gap-2 font-bold">
+          <PiUsersBold className="-scale-x-100" /> Post as
+        </label>
+
+        <div className="relative -mx-8 bg-gray-200 px-8 py-4">
+          <SelectProfile
+            inputName="authorId"
+            profiles={[session.user.profile, ...organizationProfiles]}
+          />
+        </div>
+      </div>
 
       <SelectTags tags={tags} />
-      <Editor />
+      <PostEditor />
       <SelectEvent events={events} />
 
       <button className="flex items-center gap-3 rounded-sm border-b-2 border-sky-900 bg-sky-800 px-6 py-1 text-lg font-medium text-white shadow-sm ring-1 ring-sky-950 transition-colors hover:bg-sky-50 hover:text-sky-800 focus:mt-0.5 focus:border-b-0">

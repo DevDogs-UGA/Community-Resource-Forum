@@ -11,12 +11,12 @@ import { getDate } from "date-fns";
 import { useCallback, useId, useState } from "react";
 import {
   PiCalendarBlank,
-  PiCaretDownBold,
   PiCheckBold,
   PiLinkBold,
+  PiMagnifyingGlass
 } from "react-icons/pi";
-import type { events } from "~/server/db/schema";
 import formatEventTime from "~/lib/formatEventTime";
+import type { events } from "~/server/db/schema";
 
 type Event = (typeof events)["$inferSelect"];
 
@@ -42,7 +42,10 @@ export default function SelectEvent({ events }: Props) {
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <label className="flex items-center gap-2 font-bold max-w-xl mx-auto w-full" htmlFor={id}>
+      <label
+        className="mx-auto flex w-full max-w-xl items-center gap-2 font-bold"
+        htmlFor={id}
+      >
         <PiLinkBold /> Attach an Event
       </label>
 
@@ -55,17 +58,17 @@ export default function SelectEvent({ events }: Props) {
           onChange={updateSelection}
           onClose={() => setQuery("")}
         >
-          <div className="relative max-w-xl mx-auto w-full">
+          <div className="relative mx-auto w-full max-w-xl">
             <ComboboxInput
-              className="w-full rounded-sm bg-white py-1 pr-10 pl-3 ring ring-gray-400"
+              className="w-full rounded-sm bg-white py-1 pr-3 pl-10 ring ring-gray-400"
               id="select-profile-combobox-input"
               onChange={(event) => setQuery(event.target.value)}
               displayValue={(p: Event | null) => p?.title ?? ""}
               placeholder="Search your events..."
             />
 
-            <ComboboxButton className="group absolute inset-y-0 right-0 px-3">
-              <PiCaretDownBold className="size-4 fill-black/60 group-data-hover:fill-black" />
+            <ComboboxButton className="group absolute inset-y-0 left-0 px-3">
+              <PiMagnifyingGlass className="size-4 fill-black/60 group-data-hover:fill-black" />
             </ComboboxButton>
           </div>
 

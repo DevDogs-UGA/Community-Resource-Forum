@@ -45,6 +45,9 @@
     "lint:fix": {
       "dependsOn": []
     },
+    "prettier": {
+      "dependsOn": []
+    },
     "typecheck": {
       "dependsOn": []
     },

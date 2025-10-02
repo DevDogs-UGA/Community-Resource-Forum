@@ -42,7 +42,7 @@ export default async function Navigation() {
             >
               <Dropdown.Item asChild>
                 <Link
-                  href="/draft"
+                  href="/create/post"
                   className="flex items-center gap-3 py-1 pr-6 pl-3 transition-colors hover:bg-gray-200"
                 >
                   <PiPlus />
@@ -52,7 +52,7 @@ export default async function Navigation() {
 
               <Dropdown.Item asChild>
                 <Link
-                  href="/draft"
+                  href="/create/event"
                   className="flex items-center gap-3 py-1 pr-6 pl-3 transition-colors hover:bg-gray-200"
                 >
                   <PiCalendarPlus />
