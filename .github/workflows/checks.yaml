@@ -6,7 +6,7 @@ env:
   TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
 on:
   pull_request:
-    branches: ["*"]
+    branches: ["**"]
   
 jobs:
   Checkstyle-Lint-Build:
