@@ -7,13 +7,19 @@ import "./src/env.js";
 /** @type {import("next").NextConfig} */
 const config = {
   async redirects() {
-    return [
+return [
       {
         source: "/api/auth/callback/google",
         destination: "/api/auth",
-        permanent: true
-      }
-    ]
+        permanent: true,
+      },
+    ];
+  },
+
+  images: {
+    domains: [
+      "images.pexels.com",
+    ],
   }
 };
 

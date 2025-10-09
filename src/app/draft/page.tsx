@@ -33,6 +33,7 @@ const schema = zfd.formData({
 });
 
 export default async function Draft() {
+  console.log(`Draft ${3+3}`)
   const tags = await db.query.tags.findMany();
   const session = await getSessionUser({
     with: {

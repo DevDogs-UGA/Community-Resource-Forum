@@ -12,9 +12,11 @@ import LikeButton from "~/components/LikeButton";
 import ShareButton from "~/components/ShareButton";
 import formatEventTime from "~/lib/formatEventTime";
 import { getSessionUser } from "~/server/auth";
+import PostImageGallery from "~/components/PostImgGallery";
 import { db } from "~/server/db";
 import { events, likes, posts, profiles } from "~/server/db/schema";
 export default async function HomePage() {
+  console.log("TESTING!")
   const session = await getSessionUser();
   const results = await db
     .select()
@@ -64,6 +66,16 @@ export default async function HomePage() {
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
             )}
+            {/* Added for Testing */}
+            <PostImageGallery
+              images={[
+                "https://images.pexels.com/photos/1366242/pexels-photo-1366242.jpeg",
+                "https://images.pexels.com/photos/6969890/pexels-photo-6969890.jpeg",
+                "https://images.pexels.com/photos/32655300/pexels-photo-32655300.jpeg",
+                "https://images.pexels.com/photos/32276165/pexels-photo-32276165.jpeg",
+                "https://images.pexels.com/photos/34120850/pexels-photo-34120850.jpeg",
+
+              ]} />
 
             {event && (
               <Link
