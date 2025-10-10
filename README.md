@@ -49,6 +49,7 @@ docker compose down
 ```
 
 Notes
+
 - `.env` is ignored by Docker build and git (safe). Compose injects env values at runtime via `env_file`.
 - For production, use a secret manager or Docker secrets instead of a local `.env` file.
 

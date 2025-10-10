@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "check": "turbo run lint:fix typecheck",
+    "check": "turbo run lint:fix typecheck prettier",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "pnpm db:generate && pnpm db:migrate",
@@ -21,6 +21,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
     "postinstall": "pnpm docker:reset && pnpm docker:build",
+    "prettier": "prettier -w .",
     "preview": "next build && next start",
     "start": "next start",
     "sync-upstream": "git fetch && git branch | grep -Po '\\Kfeature/.*' | xargs -i sh -c 'git checkout {} && git pull upstream main && git push upstream {}'",

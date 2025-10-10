@@ -6,9 +6,9 @@ env:
   TURBO_TEAM: ${{ secrets.VERCEL_TEAM_ID }}
 on:
   pull_request:
-    branches-ignore: 
+    branches-ignore:
       - "main"
-  
+
 jobs:
   Checkstyle-Lint-Build:
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
       - name: Lint and Format
         run: pnpm check
       - name: Pull Vercel Environment Information
-        run: 
+        run:
           - pnpm vercel pull --yes --environment=preview --git-branch=${{ github.base_ref }} --token=${{ secrets.VERCEL_TOKEN }}
           - pnpm vercel env pull --environment=development .env
       - name: Build Project Artifacts
