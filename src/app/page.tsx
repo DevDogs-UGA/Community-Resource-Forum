@@ -12,10 +12,9 @@ import {
 } from "react-icons/pi";
 import Avatar from "~/components/Avatar";
 import FlagButton from "~/components/FlagButton";
-import LikeButton from "~/components/LikeButton";
-import ShareButton from "~/components/ShareButton";
+import VoteButton from "~/components/VoteButton";
+import ShareDropdown from "~/components/ShareDropdown";
 import formatEventTime from "~/lib/formatEventTime";
-import FlagButton from "~/components/FlagButton";
 import { getSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
 import {
@@ -144,6 +143,7 @@ export default async function HomePage({
           ))}
         </h1>
       )}
+
       {Array.from(postsResult.values()).map(
         ({ post, author, event, vote, tags }) => (
           <article
@@ -201,6 +201,8 @@ export default async function HomePage({
                       {formatEventTime(event)}
                     </span>
                   </span>
+                </Link>
+              )}
 
               <FlagButton postId={post.id} userId={session?.userId ?? ""} />
 
@@ -239,16 +241,16 @@ export default async function HomePage({
                 <span className="relative">
                   <PiCalendarBlank />
                   <span className="absolute inset-0 top-1/2 w-full -translate-y-1/2 pt-px text-center text-[0.55rem] font-bold">
-                    {getDate(event.start)}
+                    {getDate(event!.start)}
                   </span>
                 </span>
 
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="-mt-0.5 overflow-x-hidden text-sm/[1.25] overflow-ellipsis">
-                    {event.title}
+                    {event!.title}
                   </span>
                   <span className="text-[0.6rem]/[1] font-bold text-gray-600">
-                    {formatEventTime(event)}
+                    {formatEventTime(event!)}
                   </span>
                 </span>
               </Link>
@@ -262,22 +264,24 @@ export default async function HomePage({
                 </button>
               </ShareDropdown>
 
-              <div className="ml-auto text-xs">
-                <VoteButton
-                  target={{ postId: post.id }}
-                  score={post.score}
-                  value={vote}
-                />
+                <div className="ml-auto text-xs">
+                  <VoteButton
+                    target={{ postId: post.id }}
+                    score={post.score}
+                    value={vote}
+                  />
+                </div> 
               </div>
-            </div>
           </article>
-        ),
-      )}
-      {postsResult.size === 0 && (
-        <p className="max-w-prose text-center text-sm text-gray-600">
-          There aren&rsquo;t any posts to display yet. Try signing in and
-          publishing some!
-        </p>
-      )}
+        ))}
+
+
+        {postsResult.size === 0 && (
+          <p className="max-w-prose text-center text-sm text-gray-600">
+            There aren&rsquo;t any posts to display yet. Try signing in and
+            publishing some!
+          </p>
+        )}
     </div>
-  );
+  ); 
+} 

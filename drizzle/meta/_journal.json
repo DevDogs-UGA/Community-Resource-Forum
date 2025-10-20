@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1758565428226,
-      "tag": "0000_cheerful_barracuda",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1758816494717,
-      "tag": "0001_many_dagger",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1758817039794,
-      "tag": "0002_left_morlun",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1759879560223,
-      "tag": "0003_fearless_daredevil",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1760394275754,
-      "tag": "0004_lethal_penance",
+      "when": 1760999516015,
+      "tag": "0000_great_meteorite",
       "breakpoints": true
     }
   ]

@@ -54,7 +54,6 @@ export const posts = mysqlTable(
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
   tags: many(tagsToPosts),
-  replies: many(replies),
   flags: many(flags),
   author: one(profiles, {
     fields: [posts.authorId],
@@ -66,7 +65,6 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   }),
   votes: many(postVotes),
   comments: many(comments),
-  flags: many(flags),
 }));
 
 export const voteValue = mysqlEnum([
