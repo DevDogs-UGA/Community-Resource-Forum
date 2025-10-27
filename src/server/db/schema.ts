@@ -46,6 +46,7 @@ export const posts = mysqlTable(
     eventId: d.varchar({ length: 255 }).references(() => events.id),
     score: d.int().notNull().default(0),
     commentCount: d.int().notNull().default(0),
+    flagCount: d.int().notNull().default(0),
     createdAt: d.timestamp().defaultNow().notNull(),
     updatedAt: d.timestamp().onUpdateNow(),
   }),
@@ -64,6 +65,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   }),
   votes: many(postVotes),
   comments: many(comments),
+  flags: many(flags),
 }));
 
 export const voteValue = mysqlEnum([
@@ -97,7 +99,7 @@ export const postVotesRelations = relations(postVotes, ({ one }) => ({
 }));
 
 export const comments = mysqlTable(
-  "comments",
+  "comment",
   (d) => ({
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
     content: d.text().notNull(),
@@ -175,7 +177,6 @@ export const tags = mysqlTable("tag", (d) => ({
 export const tagsRelations = relations(tags, ({ many }) => ({
   posts: many(tagsToPosts),
   subscribers: many(subscriptions),
-  children: many(tags),
 }));
 
 export const tagsToPosts = mysqlTable(
@@ -226,8 +227,8 @@ export const users = mysqlTable(
       .primaryKey()
       .references(() => profiles.id),
     email: varchar("email", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").onUpdateNow(),
+    createdAt: d.timestamp().defaultNow().notNull(),
+    updatedAt: d.timestamp().onUpdateNow(),
   }),
   (t) => [uniqueIndex("email_idx").on(lower(t.email))],
 );
@@ -240,6 +241,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   subscriptions: many(subscriptions),
   organizations: many(organizations),
   sessions: many(sessions),
+  flags: many(flags),
 }));
 
 export const subscriptions = mysqlTable(
@@ -319,5 +321,32 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
     fields: [sessions.userId],
     references: [users.id],
+  }),
+}));
+
+export const flags = mysqlTable(
+  "flags",
+  (d) => ({
+    userId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    postId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    createdAt: d.timestamp().defaultNow().notNull(),
+  }),
+  (t) => [primaryKey({ columns: [t.userId, t.postId] })], // max one flag per user per post
+);
+
+export const flagRelations = relations(flags, ({ one }) => ({
+  user: one(users, {
+    fields: [flags.userId],
+    references: [users.id],
+  }),
+  post: one(posts, {
+    fields: [flags.postId],
+    references: [posts.id],
   }),
 }));

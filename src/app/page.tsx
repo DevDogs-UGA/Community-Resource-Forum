@@ -5,12 +5,12 @@ import Link from "next/link";
 import {
   PiCalendarBlank,
   PiChatCircleTextBold,
-  PiDotsThreeBold,
   PiHash,
   PiShareFatBold,
   PiXBold,
 } from "react-icons/pi";
 import Avatar from "~/components/Avatar";
+import FlagButton from "~/components/FlagButton";
 import ShareDropdown from "~/components/ShareDropdown";
 import VoteButton from "~/components/VoteButton";
 import formatEventTime from "~/lib/formatEventTime";
@@ -165,9 +165,9 @@ export default async function HomePage({
                   </span>
                 </Link>
 
-                <button className="-m-0.5 rounded-full p-0.5 hover:bg-gray-200">
-                  <PiDotsThreeBold />
-                </button>
+                {session && (
+                  <FlagButton postId={post.id} userId={session?.userId} />
+                )}
               </div>
 
               {post.content && (

@@ -12,9 +12,10 @@ export const env = createEnv({
     AUTH_REDIRECT_URL: z
       .string()
       .default("http://localhost:3000/api/auth/callback/google"),
-    MYSQL_USER: (process.env.NODE_ENV === "development"
-      ? z.literal("root")
-      : z.string()
+    MYSQL_USER: (process.env.VERCEL_ENV &&
+    process.env.VERCEL_ENV !== "development"
+      ? z.string()
+      : z.literal("root")
     ).default("root"),
     MYSQL_PASSWORD: z.string().default("password"),
     MYSQL_HOST: z.string().default("localhost"),

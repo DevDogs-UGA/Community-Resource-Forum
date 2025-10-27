@@ -1,22 +1,30 @@
 {
   "$schema": "https://turborepo.com/schema.json",
-  "globalEnv": [
-    "MYSQL_PASSWORD",
-    "MYSQL_PORT",
-    "MYSQL_DATABASE",
-    "MYSQL_USER",
-    "MYSQL_HOST",
-    "AUTH_REDIRECT_PATH",
-    "AUTH_GOOGLE_ID",
-    "AUTH_GOOGLE_SECRET"
-  ],
+  "globalPassThroughEnv": ["SKIP_ENV_VALIDATION"],
   "tasks": {
     "db:generate": {
       "dependsOn": [],
-      "outputs": ["drizzle/**/*"]
+      "outputs": ["migrations/ddl.sql"]
+    },
+    "docker:ready": {
+      "cache": false
     },
     "build": {
-      "dependsOn": ["db:generate"],
+      "env": [
+        "AUTH_GOOGLE_ID",
+        "AUTH_GOOGLE_SECRET",
+        "AUTH_REDIRECT_URL",
+        "MYSQL_USER",
+        "MYSQL_PASSWORD",
+        "MYSQL_HOST",
+        "MYSQL_PORT",
+        "MYSQL_DATABASE",
+        "S3_PORT",
+        "S3_REGION",
+        "S3_ACCESS_KEY_ID",
+        "S3_SECRET_ACCESS_KEY"
+      ],
+      "dependsOn": [],
       "outputs": [".next/**"]
     },
     "Next.js": {
@@ -24,22 +32,23 @@
       "persistent": true,
       "cache": false
     },
-    "Drizzle-Studio": {
+    "Drizzle Studio": {
       "dependsOn": [],
       "persistent": true,
       "cache": false
     },
-    "lint:fix": {
-      "dependsOn": []
+    "typegen": {
+      "dependsOn": [],
+      "outputs": [".next/**", "next-env.d.ts", "tsconfig.tsbuildinfo"]
+    },
+    "lint": {
+      "dependsOn": ["typegen"]
     },
     "prettier": {
       "dependsOn": []
     },
-    "prettier:check": {
-      "dependsOn": []
-    },
     "typecheck": {
-      "dependsOn": []
+      "dependsOn": ["typegen"]
     }
   }
 }

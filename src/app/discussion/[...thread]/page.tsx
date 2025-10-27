@@ -14,7 +14,6 @@ import {
   PiClock,
   PiDotsThreeBold,
   PiHash,
-  PiShareFat,
   PiShareFatBold,
   PiTrendUp,
 } from "react-icons/pi";
@@ -104,10 +103,14 @@ function Comment({
                 </button>
               </CommentEditor.Trigger>
 
-              <button className="flex items-center gap-3 rounded-full pr-4 pl-1 leading-none hover:bg-sky-100 hover:ring hover:ring-sky-800">
-                <PiShareFat className="text-xl" />
-                <span className="text-xs font-medium">Share</span>
-              </button>
+              <ShareDropdown
+                permalink={`https://community-resource-forum.vercel.app/discussion/${postId}/${id}`}
+              >
+                <button className="flex items-center gap-2 rounded-full px-2 py-1 leading-none hover:bg-sky-100 hover:ring hover:ring-sky-800">
+                  <PiShareFatBold />
+                  <span className="text-xs font-semibold">Share</span>
+                </button>
+              </ShareDropdown>
             </div>
 
             <div className="text-xs sm:pr-4">
