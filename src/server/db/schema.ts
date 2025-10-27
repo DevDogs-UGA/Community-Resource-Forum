@@ -38,7 +38,7 @@ export const posts = mysqlTable(
   (d) => ({
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
     content: d.text(), // HTML content
-    textContent: d.text().notNull(), // Plain text - should probably be notNull
+    textContent: d.text(),
     authorId: d
       .varchar({ length: 255 })
       .notNull()
