@@ -1,17 +1,17 @@
-import { NextResponse } from 'next/server';
-import { db } from '~/server/db';
-import { events } from '~/server/db/schema';
+import { NextResponse } from "next/server";
+import { db } from "~/server/db";
+import { events } from "~/server/db/schema";
 
 export async function GET() {
   try {
     const calendarEvents = await db.query.events.findMany({
       with: {
-        profile: true
-      }
+        profile: true,
+      },
     });
 
     // Transform database events to FullCalendar format
-    const formattedEvents = calendarEvents.map(event => ({
+    const formattedEvents = calendarEvents.map((event) => ({
       id: event.id,
       title: event.title,
       start: event.start,
@@ -20,16 +20,16 @@ export async function GET() {
       location: event.location,
       extendedProps: {
         organizerId: event.organizerId,
-        organizer: event.profile
-      }
+        organizer: event.profile,
+      },
     }));
 
     return NextResponse.json(formattedEvents);
   } catch (error) {
-    console.error('Error fetching calendar events:', error);
+    console.error("Error fetching calendar events:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch calendar events' },
-      { status: 500 }
+      { error: "Failed to fetch calendar events" },
+      { status: 500 },
     );
   }
 }

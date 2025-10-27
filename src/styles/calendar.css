@@ -36,7 +36,7 @@
 }
 
 /* Ensure tooltips are above FullCalendar elements */
-.tippy-box[data-animation='fade'][data-state='visible'] {
+.tippy-box[data-animation="fade"][data-state="visible"] {
   z-index: 9999 !important;
 }
 
