@@ -20,12 +20,12 @@ export default function RemovePost({ postId, userId }: RemovePostProps) {
   const handleRemove = async () => {
     if (removed) return;
 
-    const res = await fetch(`/api/posts/${postId}`, {
+    const res = await fetch(`/api/posts/`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${userId}`,
       },
+      body: JSON.stringify({ userId, postId }),
     });
 
     if (res.ok) {
@@ -34,7 +34,7 @@ export default function RemovePost({ postId, userId }: RemovePostProps) {
   };
 
   return (
-    <button onClick={handleRemove} disabled={removed}>
+    <button onClick={handleRemove} disabled={removed} className={`px-3 py-1 rounded ${removed ? "bg-gray-300 cursor-not-allowed" : "bg-red-500 text-white hover:bg-red-600"}`}>
       {removed ? "Post Removed" : "Remove Post"}
     </button>
   );
