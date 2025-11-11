@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     (id === session.userId
       ? session.user.profile
       : session.user.organizations.find(
-          (org) => org.organizationId === id && org.role !== "member"
+          (org) => org.organizationId === id && org.role !== "member",
         )?.organization);
 
   if (!profile || !id || typeof id !== "string") {
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
   } catch (err) {
     return NextResponse.json(
       { error: "Update failed", details: String(err) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

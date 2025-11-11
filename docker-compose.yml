@@ -21,7 +21,7 @@ services:
       s3:
         condition: service_healthy
 
-  mysql:  
+  mysql:
     image: mysql:8.0
     ports:
       - "${MYSQL_PORT:-25060}:3306"
