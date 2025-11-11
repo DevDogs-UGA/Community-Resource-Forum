@@ -24,6 +24,7 @@ export const events = mysqlTable("event", (d) => ({
   allDay: d.boolean().notNull(),
   // TODO: add recurrence rules!
   location: d.varchar({ length: 255 }),
+  tags: d.json(),
 }));
 
 export const eventsRelations = relations(events, ({ one }) => ({

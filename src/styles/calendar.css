@@ -1,0 +1,123 @@
+/* Override Tippy z-index and styling */
+.tippy-box {
+  z-index: 9999 !important;
+  background-color: transparent !important;
+  border-radius: 8px;
+}
+
+.tippy-content {
+  padding: 0 !important;
+}
+
+/* Calendar event styling */
+.fc-event {
+  z-index: 1;
+  cursor: pointer;
+  background: none !important;
+  border: none !important;
+}
+
+.fc-event-main-frame {
+  background: none !important;
+}
+
+.fc-h-event {
+  background: none !important;
+  border: none !important;
+  margin-top: 2px !important;
+  margin-bottom: 2px !important;
+  height: calc(100% - 4px) !important;
+}
+
+/* Make multi-day events skinnier */
+.fc-h-event .fc-event-main {
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+}
+
+/* Ensure tooltips are above FullCalendar elements */
+.tippy-box[data-animation="fade"][data-state="visible"] {
+  z-index: 9999 !important;
+}
+
+/* Fix calendar event hover state */
+.fc .fc-event:hover {
+  z-index: 5;
+}
+
+/* Override FullCalendar popup layers */
+.fc-popover {
+  z-index: 1000 !important;
+}
+
+/* Calendar header styling */
+.fc .fc-toolbar-title {
+  font-size: 1.5rem !important;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* Time grid specific styles */
+.fc .fc-timegrid-slot {
+  height: 2.5rem !important;
+}
+
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #ef4444 !important;
+  border-width: 2px;
+}
+
+.fc .fc-timegrid-now-indicator-arrow {
+  border-color: #ef4444 !important;
+  border-width: 5px;
+}
+
+.fc .fc-timegrid-event {
+  margin: 1px 0 !important;
+  padding: 2px !important;
+}
+
+/* Time labels */
+.fc .fc-timegrid-axis-cushion {
+  font-size: 0.75rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Day header in week view */
+.fc .fc-timegrid-header-column a {
+  font-weight: 600;
+  color: #333;
+}
+
+.fc .fc-button-primary {
+  background-color: white !important;
+  border-color: #e5e7eb !important;
+  color: #374151 !important;
+  font-weight: 500 !important;
+  text-transform: capitalize !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.2s !important;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #f3f4f6 !important;
+  border-color: #d1d5db !important;
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: #f3f4f6 !important;
+  border-color: #e5e7eb !important;
+  opacity: 0.65 !important;
+}
+
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: #e5e7eb !important;
+  border-color: #d1d5db !important;
+}
+
+/* Calendar cell styling */
+.fc-day-today {
+  background-color: #f0f9ff !important;
+}

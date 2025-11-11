@@ -23,11 +23,20 @@ export default async function Navigation() {
 
   return (
     <nav className="sticky top-0 left-0 z-40 flex w-full items-center justify-between border-t-4 border-b border-t-sky-800 border-b-gray-300 bg-white px-3 py-3">
-      <Link className="text-3xl" href="/">
-        <figure className="size-[1em]">
-          <Image alt="Dev Dog" src={devdog} />
-        </figure>
-      </Link>
+      <div className="flex items-center gap-4">
+        <Link className="text-3xl" href="/">
+          <figure className="size-[1em]">
+            <Image alt="Dev Dog" src={devdog} />
+          </figure>
+        </Link>
+        <Link
+          href="/calendar"
+          className="flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+        >
+          <PiCalendarPlus className="text-lg" />
+          Calendar
+        </Link>
+      </div>
 
       {session ? (
         <Dropdown.Root>
