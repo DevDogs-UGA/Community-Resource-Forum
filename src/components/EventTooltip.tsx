@@ -11,9 +11,12 @@ export default function EventTooltip({ event }: EventTooltipProps) {
   const start = format(eventObj.start!, "MMM d, yyyy h:mm a");
   const end = eventObj.end ? format(eventObj.end, "MMM d, yyyy h:mm a") : null;
   const organizer = eventObj.extendedProps.organizer?.name || "Unknown";
+<<<<<<< HEAD
   const tags =
     eventObj.extendedProps.tags?.tags.map((tag: string) => <p>{tag} </p>) ||
     "None";
+=======
+>>>>>>> main
 
   return (
     <div className="ring-opacity-5 w-72 overflow-hidden rounded-lg bg-white p-4 text-sm shadow-lg ring-1 ring-black">
@@ -135,7 +138,10 @@ export default function EventTooltip({ event }: EventTooltipProps) {
                 allDay: eventObj.allDay,
                 location: eventObj.extendedProps.location,
                 organizerId: eventObj.extendedProps.organizerId,
+<<<<<<< HEAD
                 tags: eventObj.extendedProps.tags,
+=======
+>>>>>>> main
               };
               downloadICS(eventData);
             }}

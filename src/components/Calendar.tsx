@@ -3,12 +3,21 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
+<<<<<<< HEAD
 //import type { InferSelectModel } from 'drizzle-orm';
 //import { profiles } from '~/server/db/schema';
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import "~/styles/calendar.css";
 import { useCallback, useEffect, useState } from "react";
+=======
+//import type { InferSelectModel } from "drizzle-orm";
+//import { profiles } from "~/server/db/schema";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
+import "~/styles/calendar.css";
+import { useEffect, useState } from "react";
+>>>>>>> main
 import EventTooltip from "./EventTooltip";
 import { downloadICS } from "~/lib/generateICS";
 
@@ -97,7 +106,10 @@ export default function Calendar() {
                     allDay: eventInfo.event.allDay,
                     location: eventInfo.event.extendedProps.location,
                     organizerId: eventInfo.event.extendedProps.organizerId,
+<<<<<<< HEAD
                     tags: eventInfo.event.extendedProps.tags,
+=======
+>>>>>>> main
                   };
                   downloadICS(event);
                 }}
