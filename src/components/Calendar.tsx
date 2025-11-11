@@ -3,7 +3,6 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-<<<<<<< HEAD
 //import type { InferSelectModel } from 'drizzle-orm';
 //import { profiles } from '~/server/db/schema';
 import Tippy from "@tippyjs/react";
