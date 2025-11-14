@@ -11,7 +11,7 @@ export default function KeepPost({ postId, userId }: KeepPostProps) {
     if (kept) return;
 
     const res = await fetch(`/api/removeFlag/`, {
-      method: "REMOVE",
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
