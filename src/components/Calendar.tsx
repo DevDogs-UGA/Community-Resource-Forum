@@ -3,6 +3,7 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import type { DatesSetArg } from "@fullcalendar/core";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import "~/styles/calendar.css";
 import { useCallback, useState, useEffect } from "react";
@@ -25,6 +26,7 @@ interface CalendarEvent {
       image: string | null;
     };
     tags: unknown;
+    isMultiDay: boolean;
   };
 }
 
@@ -51,7 +53,7 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
   }, []);
 
   const handleDatesSet = useCallback(
-    (info: any) => {
+    (info: DatesSetArg) => {
       // Extract the year and month from the calendar view
       const date = info.view.currentStart;
       const year = date.getFullYear();
@@ -61,7 +63,7 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
       // Only update if the month has actually changed
       if (newMonth !== currentMonth) {
         // Push a new URL with the month search param; server will refetch on navigation
-        router.push(`?month=${newMonth}`);
+        void router.push(`?month=${newMonth}`);
       }
     },
     [currentMonth, router],

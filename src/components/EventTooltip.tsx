@@ -10,10 +10,18 @@ export default function EventTooltip({ event }: EventTooltipProps) {
   const eventObj = event.event;
   const start = format(eventObj.start!, "MMM d, yyyy h:mm a");
   const end = eventObj.end ? format(eventObj.end, "MMM d, yyyy h:mm a") : null;
-  const organizer = eventObj.extendedProps.organizer?.name || "Unknown";
-  const tags =
-    eventObj.extendedProps.tags?.tags.map((tag: string) => <p>{tag} </p>) ||
-    "None";
+  
+  const organizer: string = 
+    typeof eventObj.extendedProps.organizer?.name === "string" 
+      ? eventObj.extendedProps.organizer.name 
+      : "Unknown";
+  
+  const tagsData = eventObj.extendedProps.tags as { tags?: unknown[] } | undefined;
+  const tags = Array.isArray(tagsData?.tags)
+    ? tagsData.tags.map((tag: unknown, idx: number) => (
+        <p key={idx}>{String(tag)}</p>
+      ))
+    : "None";
 
   return (
     <div className="w-72 overflow-hidden rounded-lg bg-white p-4 text-sm shadow-lg ring-1 ring-black ring-opacity-5 sm:w-80 md:w-96">
@@ -118,8 +126,13 @@ export default function EventTooltip({ event }: EventTooltipProps) {
           </svg>
           <div className="flex-1">
             <p className="text-xs text-gray-500">Tags</p>
-            <p className="font-medium text-gray-900">{tags}</p>{" "}
-            {/*Figure out how to style this later*/}
+            <div className="font-medium text-gray-900">
+              {Array.isArray(tags) ? (
+                <div className="space-y-1">{tags}</div>
+              ) : (
+                tags
+              )}
+            </div>
           </div>
         </div>
 
