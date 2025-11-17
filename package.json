@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "aws": "docker compose run --rm aws",
-    "aws:create-bucket": "docker compose run --entrypoint='/bin/sh' --rm aws -cx 'aws s3api create-bucket --bucket=$S3_BUCKET_NAME'",
-    "aws:disable-cors": "docker compose run --entrypoint='/bin/sh' --rm aws -cx 'aws s3api put-bucket-cors --bucket=$S3_BUCKET_NAME --cors-configuration=\"{\\\"CORSRules\\\":[{\\\"AllowedOrigins\\\":[\\\"*\\\"],\\\"AllowedMethods\\\":[\\\"GET\\\",\\\"POST\\\",\\\"PUT\\\",\\\"DELETE\\\",\\\"HEAD\\\"],\\\"AllowedHeaders\\\":[\\\"*\\\"]}]}\"'",
+    "aws:create-bucket": "docker compose run --entrypoint='/bin/sh' --rm aws -cx \"aws s3api create-bucket --bucket=$S3_BUCKET_NAME\"",
+    "aws:disable-cors": "docker compose run --entrypoint='/bin/sh' --rm aws -cx \"aws s3api put-bucket-cors --bucket=$S3_BUCKET_NAME --cors-configuration='{\\\"CORSRules\\\":[{\\\"AllowedOrigins\\\":[\\\"*\\\"],\\\"AllowedMethods\\\":[\\\"GET\\\",\\\"POST\\\",\\\"PUT\\\",\\\"DELETE\\\",\\\"HEAD\\\"],\\\"AllowedHeaders\\\":[\\\"*\\\"]}]}'\"",
     "build": "next build",
     "check": "turbo run lint:fix prettier:fix typecheck",
     "db:generate": "pnpm drizzle-kit export > migrations/ddl.sql",
