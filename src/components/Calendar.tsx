@@ -46,7 +46,7 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -72,92 +72,111 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
   return (
     <div className="calendar-container h-screen p-4 md:p-6 lg:p-8">
       <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin]}
-          initialView="dayGridMonth"
-          initialDate={currentMonth ? `${currentMonth}-01` : undefined}
-          events={events}
-          datesSet={handleDatesSet}
-          eventDisplay="block"
-          dayMaxEventRows={false}
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
-          }}
-          nowIndicator={true}
-          slotMinTime="00:00:00"
-          slotMaxTime="24:00:00"
-          eventContent={(eventInfo) => (
-            <Tooltip.Provider delayDuration={0}>
-              <Tooltip.Root open={isMobile && openTooltipId === eventInfo.event.id ? true : undefined} onOpenChange={(open) => {
+        plugins={[dayGridPlugin, timeGridPlugin]}
+        initialView="dayGridMonth"
+        initialDate={currentMonth ? `${currentMonth}-01` : undefined}
+        events={events}
+        datesSet={handleDatesSet}
+        eventDisplay="block"
+        dayMaxEventRows={false}
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,timeGridDay",
+        }}
+        nowIndicator={true}
+        slotMinTime="00:00:00"
+        slotMaxTime="24:00:00"
+        eventContent={(eventInfo) => (
+          <Tooltip.Provider delayDuration={0}>
+            <Tooltip.Root
+              open={
+                isMobile && openTooltipId === eventInfo.event.id
+                  ? true
+                  : undefined
+              }
+              onOpenChange={(open) => {
                 if (isMobile) {
                   setOpenTooltipId(open ? eventInfo.event.id : null);
                 }
-              }}>
-                <Tooltip.Trigger asChild>
+              }}
+            >
+              <Tooltip.Trigger asChild>
+                <div
+                  onClick={() => {
+                    if (isMobile) {
+                      // On mobile, toggle tooltip visibility
+                      setOpenTooltipId(
+                        openTooltipId === eventInfo.event.id
+                          ? null
+                          : eventInfo.event.id,
+                      );
+                    } else {
+                      // On desktop, download ICS file
+                      const event = {
+                        id: eventInfo.event.id,
+                        title: eventInfo.event.title,
+                        start: new Date(eventInfo.event.start!),
+                        end: new Date(eventInfo.event.end!),
+                        allDay: eventInfo.event.allDay,
+                        location: eventInfo.event.extendedProps.location,
+                        organizerId: eventInfo.event.extendedProps.organizerId,
+                        tags: eventInfo.event.extendedProps.tags,
+                      };
+                      downloadICS(event);
+                    }
+                  }}
+                  onMouseEnter={() => setHoveredEventId(eventInfo.event.id)}
+                  onMouseLeave={() => setHoveredEventId(null)}
+                  className={`event-card flex w-full cursor-pointer flex-col gap-0.5 overflow-hidden rounded-sm border-l-[3px] border-l-sky-500 bg-white/95 px-1.5 py-1 shadow-sm transition-all hover:translate-y-[-1px] hover:shadow-md ${
+                    hoveredEventId === eventInfo.event.id &&
+                    !eventInfo.event.extendedProps.isMultiDay
+                      ? "md:mr-auto md:ml-auto md:w-screen md:max-w-4xl"
+                      : ""
+                  }`}
+                >
                   <div
-                    onClick={() => {
-                      if (isMobile) {
-                        // On mobile, toggle tooltip visibility
-                        setOpenTooltipId(openTooltipId === eventInfo.event.id ? null : eventInfo.event.id);
-                      } else {
-                        // On desktop, download ICS file
-                        const event = {
-                          id: eventInfo.event.id,
-                          title: eventInfo.event.title,
-                          start: new Date(eventInfo.event.start!),
-                          end: new Date(eventInfo.event.end!),
-                          allDay: eventInfo.event.allDay,
-                          location: eventInfo.event.extendedProps.location,
-                          organizerId: eventInfo.event.extendedProps.organizerId,
-                          tags: eventInfo.event.extendedProps.tags,
-                        };
-                        downloadICS(event);
-                      }
-                    }}
-                    onMouseEnter={() => setHoveredEventId(eventInfo.event.id)}
-                    onMouseLeave={() => setHoveredEventId(null)}
-                    className={`event-card flex cursor-pointer flex-col gap-0.5 rounded-sm border-l-[3px] border-l-sky-500 bg-white/95 px-1.5 py-1 shadow-sm transition-all hover:translate-y-[-1px] hover:shadow-md w-full overflow-hidden ${
-                      hoveredEventId === eventInfo.event.id && !eventInfo.event.extendedProps.isMultiDay ? 'md:w-screen md:max-w-4xl md:ml-auto md:mr-auto' : ''
+                    className={`event-title text-sm font-medium text-gray-900 transition-all ${
+                      hoveredEventId === eventInfo.event.id &&
+                      !eventInfo.event.extendedProps.isMultiDay
+                        ? "whitespace-normal"
+                        : "line-clamp-1"
                     }`}
                   >
-                    <div className={`event-title text-sm font-medium text-gray-900 transition-all ${
-                      hoveredEventId === eventInfo.event.id && !eventInfo.event.extendedProps.isMultiDay ? 'whitespace-normal' : 'line-clamp-1'
-                    }`}>
-                      {eventInfo.event.title}
-                    </div>
-                    {eventInfo.event.extendedProps.location && (
-                      <div className="event-location flex items-center gap-1 text-[10px] text-gray-600">
-                        <svg
-                          className="h-2.5 w-2.5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M12 2C7.58172 2 4 5.58172 4 10C4 14.0797 7.04334 17.0881 10.7317 17.8V21H13.2683V17.8C16.9567 17.0881 20 14.0797 20 10C20 5.58172 16.4183 2 12 2ZM12 15C9.23858 15 7 12.7614 7 10C7 7.23858 9.23858 5 12 5C14.7614 5 17 7.23858 17 10C17 12.7614 14.7614 15 12 15Z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                        <span className="truncate">
-                          {eventInfo.event.extendedProps.location}
-                        </span>
-                      </div>
-                    )}
+                    {eventInfo.event.title}
                   </div>
-                </Tooltip.Trigger>
+                  {eventInfo.event.extendedProps.location && (
+                    <div className="event-location flex items-center gap-1 text-[10px] text-gray-600">
+                      <svg
+                        className="h-2.5 w-2.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 2C7.58172 2 4 5.58172 4 10C4 14.0797 7.04334 17.0881 10.7317 17.8V21H13.2683V17.8C16.9567 17.0881 20 14.0797 20 10C20 5.58172 16.4183 2 12 2ZM12 15C9.23858 15 7 12.7614 7 10C7 7.23858 9.23858 5 12 5C14.7614 5 17 7.23858 17 10C17 12.7614 14.7614 15 12 15Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      <span className="truncate">
+                        {eventInfo.event.extendedProps.location}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </Tooltip.Trigger>
 
-                <Tooltip.Portal>
-                  <Tooltip.Content side="top" sideOffset={6} className="z-50">
-                    <EventTooltip event={eventInfo} />
-                    <Tooltip.Arrow />
-                  </Tooltip.Content>
-                </Tooltip.Portal>
-              </Tooltip.Root>
-            </Tooltip.Provider>
-          )}
-          height="100%"
-        />
+              <Tooltip.Portal>
+                <Tooltip.Content side="top" sideOffset={6} className="z-50">
+                  <EventTooltip event={eventInfo} />
+                  <Tooltip.Arrow />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            </Tooltip.Root>
+          </Tooltip.Provider>
+        )}
+        height="100%"
+      />
     </div>
   );
 }

@@ -28,11 +28,15 @@ interface CalendarEvent {
   };
 }
 
-export async function getCalendarEvents(month?: string): Promise<CalendarEvent[]> {
+export async function getCalendarEvents(
+  month?: string,
+): Promise<CalendarEvent[]> {
   try {
     // Parse month (format: YYYY-MM) or default to current month
     const now = new Date();
-    const targetMonth = month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const targetMonth =
+      month ||
+      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const parts = targetMonth.split("-");
     const year = parseInt(parts[0] || "0", 10);
     const monthNum = parseInt(parts[1] || "1", 10);
@@ -45,8 +49,8 @@ export async function getCalendarEvents(month?: string): Promise<CalendarEvent[]
     // This ensures multi-day events display across all days they cover
     const calendarEvents = await db.query.events.findMany({
       where: and(
-        lt(events.start, monthEnd),  // Event starts before month ends
-        gte(events.end, monthStart)  // Event ends after month starts
+        lt(events.start, monthEnd), // Event starts before month ends
+        gte(events.end, monthStart), // Event ends after month starts
       ),
       with: {
         profile: true,
@@ -59,7 +63,7 @@ export async function getCalendarEvents(month?: string): Promise<CalendarEvent[]
       const endDate = new Date(event.end);
       // Check if event spans multiple days (ends on different day than it starts)
       const isMultiDay = startDate.toDateString() !== endDate.toDateString();
-      
+
       // For all-day multi-day events, adjust end date to be exclusive (next day)
       let finalEnd = event.end.toISOString();
       if (event.allDay && isMultiDay) {
@@ -69,7 +73,7 @@ export async function getCalendarEvents(month?: string): Promise<CalendarEvent[]
         adjustedEnd.setHours(0, 0, 0, 0);
         finalEnd = adjustedEnd.toISOString();
       }
-      
+
       return {
         id: event.id,
         title: event.title,

@@ -10,13 +10,15 @@ export default function EventTooltip({ event }: EventTooltipProps) {
   const eventObj = event.event;
   const start = format(eventObj.start!, "MMM d, yyyy h:mm a");
   const end = eventObj.end ? format(eventObj.end, "MMM d, yyyy h:mm a") : null;
-  
-  const organizer: string = 
-    typeof eventObj.extendedProps.organizer?.name === "string" 
-      ? eventObj.extendedProps.organizer.name 
+
+  const organizer: string =
+    typeof eventObj.extendedProps.organizer?.name === "string"
+      ? eventObj.extendedProps.organizer.name
       : "Unknown";
-  
-  const tagsData = eventObj.extendedProps.tags as { tags?: unknown[] } | undefined;
+
+  const tagsData = eventObj.extendedProps.tags as
+    | { tags?: unknown[] }
+    | undefined;
   const tags = Array.isArray(tagsData?.tags)
     ? tagsData.tags.map((tag: unknown, idx: number) => (
         <p key={idx}>{String(tag)}</p>
@@ -24,7 +26,7 @@ export default function EventTooltip({ event }: EventTooltipProps) {
     : "None";
 
   return (
-    <div className="w-72 overflow-hidden rounded-lg bg-white p-4 text-sm shadow-lg ring-1 ring-black ring-opacity-5 sm:w-80 md:w-96">
+    <div className="ring-opacity-5 w-72 overflow-hidden rounded-lg bg-white p-4 text-sm shadow-lg ring-1 ring-black sm:w-80 md:w-96">
       <div className="space-y-3 text-gray-600">
         <div className="flex items-center gap-2">
           <svg
