@@ -35,11 +35,11 @@ export async function getCalendarEvents(
     // Parse month (format: YYYY-MM) or default to current month
     const now = new Date();
     const targetMonth =
-      month ||
+      month ??
       `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const parts = targetMonth.split("-");
-    const year = parseInt(parts[0] || "0", 10);
-    const monthNum = parseInt(parts[1] || "1", 10);
+    const year = parseInt(parts[0] ?? "0", 10);
+    const monthNum = parseInt(parts[1] ?? "1", 10);
 
     // Calculate start and end of the month
     const monthStart = new Date(year, monthNum - 1, 1);

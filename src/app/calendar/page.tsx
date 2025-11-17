@@ -1,18 +1,22 @@
 import { getCalendarEvents } from "~/server/calendar";
 import Calendar from "~/components/Calendar";
 
+interface SearchParams {
+  month?: string;
+}
+
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: { month?: string };
+  searchParams?: Promise<SearchParams>;
 }) {
   // Determine target month from search params or default to current month
   const now = new Date();
   const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   // `searchParams` is a possibly async dynamic API in Next.js — await it before using properties
-  const sp = await (searchParams as any);
-  const month = (sp && sp.month) || defaultMonth;
+  const sp = await searchParams;
+  const month = sp?.month ?? defaultMonth;
 
   // Fetch events server-side for the requested month
   const events = await getCalendarEvents(month);

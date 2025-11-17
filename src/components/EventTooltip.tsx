@@ -11,10 +11,16 @@ export default function EventTooltip({ event }: EventTooltipProps) {
   const start = format(eventObj.start!, "MMM d, yyyy h:mm a");
   const end = eventObj.end ? format(eventObj.end, "MMM d, yyyy h:mm a") : null;
 
-  const organizer: string =
-    typeof eventObj.extendedProps.organizer?.name === "string"
-      ? eventObj.extendedProps.organizer.name
-      : "Unknown";
+  const organizer: string = (() => {
+    const org = eventObj.extendedProps.organizer as unknown;
+    if (org && typeof org === "object" && "name" in org) {
+      const orgObj = org as Record<string, unknown>;
+      if (typeof orgObj.name === "string") {
+        return orgObj.name;
+      }
+    }
+    return "Unknown";
+  })();
 
   const tagsData = eventObj.extendedProps.tags as
     | { tags?: unknown[] }
@@ -148,9 +154,9 @@ export default function EventTooltip({ event }: EventTooltipProps) {
                 start: new Date(eventObj.start!),
                 end: new Date(eventObj.end!),
                 allDay: eventObj.allDay,
-                location: eventObj.extendedProps.location,
-                organizerId: eventObj.extendedProps.organizerId,
-                tags: eventObj.extendedProps.tags,
+                location: eventObj.extendedProps.location as string | null,
+                organizerId: eventObj.extendedProps.organizerId as string,
+                tags: eventObj.extendedProps.tags as unknown,
               };
               downloadICS(eventData);
             }}

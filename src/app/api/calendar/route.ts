@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { db } from "~/server/db";
-import { events } from "~/server/db/schema";
 
 export async function GET() {
   try {

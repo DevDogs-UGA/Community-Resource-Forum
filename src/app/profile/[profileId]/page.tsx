@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { db } from "~/server/db";
 import { profiles, posts } from "~/server/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -76,10 +77,12 @@ export default async function ProfilePage({
         <div className="md:col-span-1">
           <div className="rounded-2xl bg-white p-6 shadow-sm">
             {profile.image ? (
-              <img
+              <Image
                 src={profile.image}
                 alt={profile.name}
-                className="mb-4 h-28 w-28 rounded-full object-cover"
+                width={112}
+                height={112}
+                className="mb-4 rounded-full object-cover"
               />
             ) : (
               <div className="mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-gray-200 text-3xl font-bold text-gray-500">

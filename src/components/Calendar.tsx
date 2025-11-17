@@ -119,9 +119,12 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
                         start: new Date(eventInfo.event.start!),
                         end: new Date(eventInfo.event.end!),
                         allDay: eventInfo.event.allDay,
-                        location: eventInfo.event.extendedProps.location,
-                        organizerId: eventInfo.event.extendedProps.organizerId,
-                        tags: eventInfo.event.extendedProps.tags,
+                        location: eventInfo.event.extendedProps.location as
+                          | string
+                          | null,
+                        organizerId: eventInfo.event.extendedProps
+                          .organizerId as string,
+                        tags: eventInfo.event.extendedProps.tags as unknown,
                       };
                       downloadICS(event);
                     }
