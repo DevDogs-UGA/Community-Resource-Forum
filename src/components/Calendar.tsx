@@ -5,7 +5,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import "~/styles/calendar.css";
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import EventTooltip from "./EventTooltip";
 import { downloadICS } from "~/lib/generateICS";
@@ -35,6 +35,20 @@ interface CalendarProps {
 
 export default function Calendar({ events, currentMonth }: CalendarProps) {
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
+  const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
+  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
+
+  // Detect mobile on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleDatesSet = useCallback(
     (info: any) => {
@@ -54,13 +68,15 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
   );
 
   return (
-    <div className="h-screen p-4">
+    <div className="calendar-container h-screen p-4 md:p-6 lg:p-8">
       <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin]}
           initialView="dayGridMonth"
           initialDate={currentMonth ? `${currentMonth}-01` : undefined}
           events={events}
           datesSet={handleDatesSet}
+          eventDisplay="block"
+          dayMaxEventRows={false}
           headerToolbar={{
             left: "prev,next today",
             center: "title",
@@ -71,29 +87,45 @@ export default function Calendar({ events, currentMonth }: CalendarProps) {
           slotMaxTime="24:00:00"
           eventContent={(eventInfo) => (
             <Tooltip.Provider delayDuration={0}>
-              <Tooltip.Root>
+              <Tooltip.Root open={isMobile && openTooltipId === eventInfo.event.id ? true : undefined} onOpenChange={(open) => {
+                if (isMobile) {
+                  setOpenTooltipId(open ? eventInfo.event.id : null);
+                }
+              }}>
                 <Tooltip.Trigger asChild>
                   <div
                     onClick={() => {
-                      const event = {
-                        id: eventInfo.event.id,
-                        title: eventInfo.event.title,
-                        start: new Date(eventInfo.event.start!),
-                        end: new Date(eventInfo.event.end!),
-                        allDay: eventInfo.event.allDay,
-                        location: eventInfo.event.extendedProps.location,
-                        organizerId: eventInfo.event.extendedProps.organizerId,
-                        tags: eventInfo.event.extendedProps.tags,
-                      };
-                      downloadICS(event);
+                      if (isMobile) {
+                        // On mobile, toggle tooltip visibility
+                        setOpenTooltipId(openTooltipId === eventInfo.event.id ? null : eventInfo.event.id);
+                      } else {
+                        // On desktop, download ICS file
+                        const event = {
+                          id: eventInfo.event.id,
+                          title: eventInfo.event.title,
+                          start: new Date(eventInfo.event.start!),
+                          end: new Date(eventInfo.event.end!),
+                          allDay: eventInfo.event.allDay,
+                          location: eventInfo.event.extendedProps.location,
+                          organizerId: eventInfo.event.extendedProps.organizerId,
+                          tags: eventInfo.event.extendedProps.tags,
+                        };
+                        downloadICS(event);
+                      }
                     }}
-                    className="flex cursor-pointer flex-col gap-0.5 rounded-sm border-l-[3px] border-l-sky-500 bg-white/95 px-1.5 py-1 shadow-sm transition-all hover:translate-y-[-1px] hover:shadow-md"
+                    onMouseEnter={() => setHoveredEventId(eventInfo.event.id)}
+                    onMouseLeave={() => setHoveredEventId(null)}
+                    className={`event-card flex cursor-pointer flex-col gap-0.5 rounded-sm border-l-[3px] border-l-sky-500 bg-white/95 px-1.5 py-1 shadow-sm transition-all hover:translate-y-[-1px] hover:shadow-md w-full overflow-hidden ${
+                      hoveredEventId === eventInfo.event.id && !eventInfo.event.extendedProps.isMultiDay ? 'md:w-screen md:max-w-4xl md:ml-auto md:mr-auto' : ''
+                    }`}
                   >
-                    <div className="line-clamp-1 text-sm font-medium text-gray-900">
+                    <div className={`event-title text-sm font-medium text-gray-900 transition-all ${
+                      hoveredEventId === eventInfo.event.id && !eventInfo.event.extendedProps.isMultiDay ? 'whitespace-normal' : 'line-clamp-1'
+                    }`}>
                       {eventInfo.event.title}
                     </div>
                     {eventInfo.event.extendedProps.location && (
-                      <div className="flex items-center gap-1 text-[10px] text-gray-600">
+                      <div className="event-location flex items-center gap-1 text-[10px] text-gray-600">
                         <svg
                           className="h-2.5 w-2.5"
                           viewBox="0 0 24 24"

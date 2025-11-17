@@ -16,7 +16,7 @@ export default function EventTooltip({ event }: EventTooltipProps) {
     "None";
 
   return (
-    <div className="ring-opacity-5 w-72 overflow-hidden rounded-lg bg-white p-4 text-sm shadow-lg ring-1 ring-black">
+    <div className="w-72 overflow-hidden rounded-lg bg-white p-4 text-sm shadow-lg ring-1 ring-black ring-opacity-5 sm:w-80 md:w-96">
       <div className="space-y-3 text-gray-600">
         <div className="flex items-center gap-2">
           <svg
