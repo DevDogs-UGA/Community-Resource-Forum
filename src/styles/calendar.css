@@ -1,13 +1,4 @@
-/* Override Tippy z-index and styling */
-.tippy-box {
-  z-index: 9999 !important;
-  background-color: transparent !important;
-  border-radius: 8px;
-}
-
-.tippy-content {
-  padding: 0 !important;
-}
+/* Tooltip overrides removed (migrated from Tippy to Radix). */
 
 /* Calendar event styling */
 .fc-event {
