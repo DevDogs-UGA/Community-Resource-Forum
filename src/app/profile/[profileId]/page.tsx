@@ -8,12 +8,15 @@ import { notFound } from "next/navigation";
 //This view is only visibile to each user for their own profile, as it contains the special "edit" button that actually
 //allows them to edit their own
 
-export default async function ProfilePage({
-  params,
-}: {
-  params: Promise<{ profileId: string }>;
-}) {
-  const session = await getSessionUser({
+//Small helper function to get rid of <p> and </p> that show up in post content cards.
+function stripPTags(html: string) {
+  return html.replace(/^<p>([\s\S]*)<\/p>$/i, '$1');
+}
+
+
+export default async function ProfilePage({params}: {params: Promise <{ profileId: string}>}) {
+
+   const session = await getSessionUser({
     with: {
       profile: {
         with: {
@@ -170,6 +173,12 @@ export default async function ProfilePage({
                     <div className="whitespace-pre-wrap text-gray-800">
                       {post.content}
                     </div>
+                    <div
+        className="text-gray-800 whitespace-pre-wrap"
+        dangerouslySetInnerHTML={{
+          __html: post.content ? stripPTags(post.content) : ""
+        }}
+      />
                   </article>
                 );
               })}
