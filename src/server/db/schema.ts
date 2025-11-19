@@ -44,6 +44,7 @@ export const posts = mysqlTable(
       .references(() => profiles.id),
     eventId: d.varchar({ length: 255 }).references(() => events.id),
     score: d.int().notNull().default(0),
+    archived: d.boolean().notNull().default(false), 
     commentCount: d.int().notNull().default(0),
     flagCount: d.int().notNull().default(0),
     createdAt: d.timestamp().defaultNow().notNull(),
@@ -54,6 +55,7 @@ export const posts = mysqlTable(
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
   tags: many(tagsToPosts),
+  flags: many(flags),
   author: one(profiles, {
     fields: [posts.authorId],
     references: [profiles.id],
@@ -64,7 +66,6 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   }),
   votes: many(postVotes),
   comments: many(comments),
-  flags: many(flags),
 }));
 
 export const voteValue = mysqlEnum([
@@ -98,11 +99,12 @@ export const postVotesRelations = relations(postVotes, ({ one }) => ({
 }));
 
 export const comments = mysqlTable(
-  "comment",
+  "comments",
   (d) => ({
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
     content: d.text().notNull(),
     score: d.int().notNull().default(0),
+    archived: d.boolean().notNull().default(false), 
     authorId: d
       .varchar({ length: 255 })
       .notNull()
@@ -230,8 +232,8 @@ export const users = mysqlTable(
       .primaryKey()
       .references(() => profiles.id),
     email: varchar("email", { length: 255 }).notNull(),
-    createdAt: d.timestamp().defaultNow().notNull(),
-    updatedAt: d.timestamp().onUpdateNow(),
+    createdAt: d.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: d.timestamp("updated_at").onUpdateNow(),
   }),
   (t) => [uniqueIndex("email_idx").on(lower(t.email))],
 );
