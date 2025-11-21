@@ -15,6 +15,7 @@ import ShareDropdown from "~/components/ShareDropdown";
 import VoteButton from "~/components/VoteButton";
 import formatEventTime from "~/lib/formatEventTime";
 import { getSessionUser } from "~/server/auth";
+import PostImageGallery from "~/components/PostImgGallery";
 import { db } from "~/server/db";
 import {
   events,
@@ -170,12 +171,12 @@ export default async function HomePage({
                 )}
               </div>
 
-              {post.content && (
-                <div
-                  className="prose prose-sm"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
-                />
-              )}
+            {post.content && (
+              <div
+                className="prose prose-sm"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
+            )}
 
               {event && (
                 <Link
