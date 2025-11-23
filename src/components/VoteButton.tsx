@@ -31,11 +31,14 @@ interface Props {
   score: number;
   value: typeof postVotes.$inferSelect.value | null;
   target: { postId: string } | { commentId: string };
-  [key: string]: number | string | boolean | null | { postId: string } | { commentId: string };
+  disabled?: boolean;
 }
 
-export default function VoteButton({ target, score, value, ...props}: Props) {
-  const [formState, formAction, pending] = useActionState(vote, { score, value });
+export default function VoteButton({ target, score, value, disabled }: Props) {
+  const [formState, formAction, pending] = useActionState(vote, {
+    score,
+    value,
+  });
   const [optimisticState, setOptimisticState] = useState({ score, value });
   const [dialogOpen, setDialogOpen] = useState(false);
   const state = pending ? optimisticState : formState;
@@ -58,7 +61,7 @@ export default function VoteButton({ target, score, value, ...props}: Props) {
   return (
     <form
       action={formAction}
-      className="flex cursor-default items-center gap-1 rounded-full bg-gradient-to-br ring-gray-400 hover:bg-white hover:ring has-[[value=up]:hover]:from-green-200 has-[[value=up]:hover]:to-green-50 has-[[value=up]:hover]:text-green-900 has-[[value=up]:hover]:ring-green-900 has-[[value^=down]:hover]:from-rose-50 has-[[value^=down]:hover]:to-rose-200 has-[[value^=down]:hover]:text-rose-900 has-[[value^=down]:hover]:ring-rose-900 has-[[value^=down]:hover]:[&>[value=up]]:opacity-0 has-[[value=up]:hover]:[&>[value^=down]]:opacity-0"
+      className="cursor-default rounded-full bg-linear-to-br ring-gray-400 not-[:has(:disabled)]:ring hover:bg-white has-disabled:cursor-not-allowed has-[[value=up]:hover]:from-green-200 has-[[value=up]:hover]:to-green-50 has-[[value=up]:hover]:text-green-900 has-[[value=up]:hover]:ring-green-900 has-[[value^=down]:hover]:from-rose-50 has-[[value^=down]:hover]:to-rose-200 has-[[value^=down]:hover]:text-rose-900 has-[[value^=down]:hover]:ring-rose-900 has-[[value^=down]:hover]:[&>[value=up]]:opacity-0 has-[[value=up]:hover]:[&>[value^=down]]:opacity-0"
       onSubmit={optimisticVote}
     >
       <input
@@ -68,40 +71,43 @@ export default function VoteButton({ target, score, value, ...props}: Props) {
         value={"postId" in target ? target.postId : target.commentId}
       />
 
-      {/* disabled:text-gray-600 data-[active=true]:disabled:text-emerald-800 */} 
-      <button
-        className="group text-[2em] leading-none transition-colors hover:text-green-700 data-[active=true]:text-green-700" 
-        data-active={state.value === "up"}
-        name="value"
-        value="up"
-        type="submit"
-        {...props}
+      {/* disabled:text-gray-600 data-[active=true]:disabled:text-emerald-800 */}
+      <fieldset
+        className="flex items-center gap-1 disabled:pointer-events-none disabled:opacity-60"
+        disabled={disabled}
       >
-        <PiArrowCircleUp className="group-[[data-active=true]]:hidden" />
-        <PiArrowCircleUpFill className="hidden text-green-700 group-[[data-active=true]]:block" />
-      </button>
+        <button
+          className="group text-[2em] leading-none transition-colors hover:text-green-700 data-[active=true]:text-green-700"
+          data-active={state.value === "up"}
+          name="value"
+          value="up"
+          type="submit"
+        >
+          <PiArrowCircleUp className="group-data-[active=true]:hidden" />
+          <PiArrowCircleUpFill className="hidden text-green-700 group-data-[active=true]:block" />
+        </button>
 
-      <p className="min-w-5 text-center font-semibold">
-        {/* TODO: Add large integer formatting using `Intl.NumberFormat` */}
-        {state.score}
-      </p>
+        <p className="min-w-5 text-center font-semibold">
+          {/* TODO: Add large integer formatting using `Intl.NumberFormat` */}
+          {state.score}
+        </p>
 
-      <button
-        className="group text-[2em] leading-none transition-colors hover:text-rose-700 data-[active=true]:text-red-700"
-        data-active={state.value?.startsWith("down")}
-        name="value"
-        value={state.value?.startsWith("down") ? state.value : "down.*"}
-        type={state.value?.startsWith("down") ? "submit" : "button"}
-        onClick={
-          state.value?.startsWith("down")
-            ? undefined
-            : () => setDialogOpen(true)
-        }
-        {...props}
-      >
-        <PiArrowCircleDown className="group-[[data-active=true]]:hidden" />
-        <PiArrowCircleDownFill className="hidden text-red-700 group-[[data-active=true]]:block" />
-      </button>
+        <button
+          className="group text-[2em] leading-none transition-colors hover:text-rose-700 data-[active=true]:text-red-700"
+          data-active={state.value?.startsWith("down")}
+          name="value"
+          value={state.value?.startsWith("down") ? state.value : "down.*"}
+          type={state.value?.startsWith("down") ? "submit" : "button"}
+          onClick={
+            state.value?.startsWith("down")
+              ? undefined
+              : () => setDialogOpen(true)
+          }
+        >
+          <PiArrowCircleDown className="group-data-[active=true]:hidden" />
+          <PiArrowCircleDownFill className="hidden text-red-700 group-data-[active=true]:block" />
+        </button>
+      </fieldset>
 
       <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
         <Dialog.Portal>

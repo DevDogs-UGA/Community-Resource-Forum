@@ -17,6 +17,9 @@ services:
       AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-test}
       AWS_ENDPOINT_URL_S3: http://s3:4566
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-devdogs}
+    volumes:
+      - /volumes/aws:/scripts:ro
+    entrypoint: /scripts/init.sh
     depends_on:
       s3:
         condition: service_healthy
@@ -58,7 +61,7 @@ services:
       mysql-dev:
         condition: service_healthy
     volumes:
-      - ./migrations/:/migrations:ro
+      - ./volumes/atlas/:/migrations:ro
     command: >
       schema clean
         -u "mysql://root:password@mysql-dev:3306/dev" 

@@ -3,21 +3,20 @@ import Link from "next/link";
 import {
   PiCalendarBlank,
   PiChatCircleTextBold,
-  PiDotsThreeBold,
-  PiShareFatBold,
   PiHash,
+  PiShareFatBold
 } from "react-icons/pi";
 import Avatar from "~/components/Avatar";
 import FlagButton from "~/components/FlagButton";
-import VoteButton from "~/components/VoteButton";
 import ShareDropdown from "~/components/ShareDropdown";
+import VoteButton from "~/components/VoteButton";
 import formatEventTime from "~/lib/formatEventTime";
 import type {
   events,
   postVotes,
   posts,
   profiles,
-  sessions,
+  sessions, 
 } from "~/server/db/schema";
 
 export default function Post({
@@ -26,14 +25,14 @@ export default function Post({
   event,
   vote,
   session,
-  readonly = false 
+  readonly = false,
 }: {
   post: typeof posts.$inferSelect;
   profile: typeof profiles.$inferSelect;
   event: typeof events.$inferSelect;
   vote: typeof postVotes.$inferSelect | null;
   session: typeof sessions.$inferSelect | null;
-  readonly?: boolean; 
+  readonly?: boolean;
 }) {
   return (
     <article
@@ -59,7 +58,13 @@ export default function Post({
             </Link>
           </div>
 
-          {session && <FlagButton postId={post.id} userId={session.userId} disabled={readonly} />}
+          {session && (
+            <FlagButton
+              postId={post.id}
+              userId={session.userId}
+              disabled={readonly}
+            />
+          )}
         </div>
 
         {post.content && (
@@ -134,7 +139,7 @@ export default function Post({
               target={{ postId: post.id }}
               score={post.score ?? 0}
               value={vote ? vote.value : null}
-              disabled={readonly} 
+              disabled={true}
             />
           </div>
         </div>

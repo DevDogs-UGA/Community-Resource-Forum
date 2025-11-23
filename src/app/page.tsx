@@ -4,15 +4,14 @@ import { alias } from "drizzle-orm/mysql-core";
 import Link from "next/link";
 import {
   PiCalendarBlank,
-  PiChatCircleTextBold,
   PiHash,
   PiShareFatBold,
-  PiXBold,
+  PiXBold
 } from "react-icons/pi";
 import Avatar from "~/components/Avatar";
 import FlagButton from "~/components/FlagButton";
-import VoteButton from "~/components/VoteButton";
 import ShareDropdown from "~/components/ShareDropdown";
+import VoteButton from "~/components/VoteButton";
 import formatEventTime from "~/lib/formatEventTime";
 import { getSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
