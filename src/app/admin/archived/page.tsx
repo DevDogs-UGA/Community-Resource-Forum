@@ -4,13 +4,13 @@ import { and, exists, sql } from "drizzle-orm";
 
 import Post from "~/components/Post";
 import RemovePost from "~/components/RemovePost";
-// import ArchivePost from "~/components/ArchivePost"; 
+// import ArchivePost from "~/components/ArchivePost";
 import KeepPost from "~/components/KeepPost";
 
 export default async function ArchivedPage() {
   const results = await db
     .select({
-      post: posts, // WHERE ${posts.archived} = FALSE 
+      post: posts, // WHERE ${posts.archived} = FALSE
       author: profiles,
       event: events,
       flagCount: sql`(SELECT COUNT(*) FROM ${flags} WHERE ${flags.postId} = ${posts.id})`,
@@ -19,14 +19,19 @@ export default async function ArchivedPage() {
     .leftJoin(profiles, sql`${posts.authorId} = ${profiles.id}`)
     .leftJoin(events, sql`${posts.eventId} = ${events.id}`)
     .where(
-      and(exists(sql`(SELECT 1 FROM ${flags} WHERE ${flags.postId} = ${posts.id})`), sql`${posts.archived} = TRUE`)
+      and(
+        exists(
+          sql`(SELECT 1 FROM ${flags} WHERE ${flags.postId} = ${posts.id})`,
+        ),
+        sql`${posts.archived} = TRUE`,
+      ),
     )
     .orderBy(
       sql`(SELECT COUNT(*) FROM ${flags} WHERE ${flags.postId} = ${posts.id}) DESC`,
     );
 
   return (
-    <div className="mx-auto flex w-full max-w-xl h-screen flex-col gap-6 px-6 py-6">
+    <div className="mx-auto flex h-screen w-full max-w-xl flex-col gap-6 px-6 py-6">
       {results.length === 0 ? (
         <p className="max-w-prose text-center text-gray-600">
           There are no archived posts.
@@ -57,10 +62,7 @@ export default async function ArchivedPage() {
               readonly
             />
             <div className="flex justify-end space-x-4">
-              <KeepPost
-                postId={post.id}
-                userId={author?.id ?? "admin"}
-              />
+              <KeepPost postId={post.id} userId={author?.id ?? "admin"} />
               {/* TODO: make dropdown menu with default action as remove post  */}
 
               <RemovePost

@@ -16,7 +16,7 @@ export default function ArchivePost({ postId, userId }: ArchivePostProps) {
     if (archived) return;
 
     const res = await fetch(`/api/posts/`, {
-      method: "PATCH", 
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },

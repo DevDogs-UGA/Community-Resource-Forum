@@ -7,7 +7,7 @@ import {
   PiSignInBold,
   PiSignOut,
   PiUser,
-  PiDetective, 
+  PiDetective,
 } from "react-icons/pi";
 import devdog from "~/assets/devdog.png";
 import signIn from "~/server/actions/signIn";

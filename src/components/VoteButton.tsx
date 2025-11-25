@@ -32,9 +32,16 @@ interface Props {
   value: typeof postVotes.$inferSelect.value | null;
   target: { postId: string } | { commentId: string };
   disabled?: boolean;
+  [key: string]:
+    | number
+    | string
+    | boolean
+    | null
+    | { postId: string }
+    | { commentId: string };
 }
 
-export default function VoteButton({ target, score, value, disabled }: Props) {
+export default function VoteButton({ target, score, value, ...props }: Props) {
   const [formState, formAction, pending] = useActionState(vote, {
     score,
     value,
@@ -82,6 +89,7 @@ export default function VoteButton({ target, score, value, disabled }: Props) {
           name="value"
           value="up"
           type="submit"
+          {...props} 
         >
           <PiArrowCircleUp className="group-data-[active=true]:hidden" />
           <PiArrowCircleUpFill className="hidden text-green-700 group-data-[active=true]:block" />

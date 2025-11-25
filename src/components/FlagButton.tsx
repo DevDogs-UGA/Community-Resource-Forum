@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { PiFlagBold, PiFlagFill } from "react-icons/pi"; 
+import { PiFlagBold, PiFlagFill } from "react-icons/pi";
 
 interface FlagButtonProps {
   postId: string;
@@ -48,7 +48,11 @@ export default function FlagButton({
       }`}
       {...props}
     >
-      {flagged ? <PiFlagFill className="text-lg" /> : <PiFlagBold className="text-lg" />}
+      {flagged ? (
+        <PiFlagFill className="text-lg" />
+      ) : (
+        <PiFlagBold className="text-lg" />
+      )}
     </button>
   );
 }

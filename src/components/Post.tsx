@@ -16,7 +16,7 @@ import type {
   postVotes,
   posts,
   profiles,
-  sessions, 
+  sessions,
 } from "~/server/db/schema";
 
 export default function Post({
@@ -139,7 +139,7 @@ export default function Post({
               target={{ postId: post.id }}
               score={post.score ?? 0}
               value={vote ? vote.value : null}
-              disabled={true}
+              disabled={readonly}
             />
           </div>
         </div>

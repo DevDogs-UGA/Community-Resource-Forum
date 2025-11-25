@@ -44,7 +44,7 @@ export const posts = mysqlTable(
       .references(() => profiles.id),
     eventId: d.varchar({ length: 255 }).references(() => events.id),
     score: d.int().notNull().default(0),
-    archived: d.boolean().notNull().default(false), 
+    archived: d.boolean().notNull().default(false),
     commentCount: d.int().notNull().default(0),
     flagCount: d.int().notNull().default(0),
     createdAt: d.timestamp().defaultNow().notNull(),
@@ -104,7 +104,7 @@ export const comments = mysqlTable(
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
     content: d.text().notNull(),
     score: d.int().notNull().default(0),
-    archived: d.boolean().notNull().default(false), 
+    archived: d.boolean().notNull().default(false),
     authorId: d
       .varchar({ length: 255 })
       .notNull()
