@@ -50,7 +50,7 @@ export default async function Navigation() {
                   Your Profile
                 </Link>
               </Dropdown.Item>
-              
+
               <Dropdown.Item asChild>
                 <Link
                   href="/create/post"
