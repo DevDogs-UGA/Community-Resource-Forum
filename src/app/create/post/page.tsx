@@ -31,6 +31,7 @@ const schema = zfd.formData({
       return z.NEVER;
     }
   }),
+  textContent: zfd.text(),
 });
 
 export default async function CreatePost() {
@@ -67,6 +68,7 @@ export default async function CreatePost() {
       tagId: tags,
       authorId,
       eventId,
+      textContent,
     } = await schema.parseAsync(data);
 
     if (
@@ -85,6 +87,7 @@ export default async function CreatePost() {
           authorId,
           eventId,
           content,
+          textContent,
         })
         .$returningId();
 
