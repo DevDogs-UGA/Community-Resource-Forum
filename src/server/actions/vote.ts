@@ -3,7 +3,7 @@
 import { and, eq, sql } from "drizzle-orm";
 import * as z from "zod";
 import * as zfd from "zod-form-data";
-import { getSessionUser } from "../auth";
+import { expectSessionUser, getSessionUser } from "../auth";
 import { db } from "../db";
 import {
   comments,
@@ -13,6 +13,7 @@ import {
   type voteValue,
 } from "../db/schema";
 import signIn from "./signIn";
+import { increment } from "../db/utils";
 
 export interface PrevState {
   score: number;
@@ -38,27 +39,8 @@ const schema = zfd.formData(
     ),
 );
 
-function valueOf(vote?: PrevState["value"]) {
-  switch (vote) {
-    case "up":
-      return 1;
-    case undefined:
-      return 0;
-    case null:
-      return 0;
-    default:
-      return -1;
-  }
-}
-
 export default async function vote(prevState: PrevState, formData: FormData) {
-  const session = await getSessionUser();
-
-  if (session === null) {
-    await signIn();
-    throw new Error("🍸 How did we get here?");
-  }
-
+  const session = await expectSessionUser();
   const data = await schema.parseAsync(formData);
 
   const target =
@@ -119,15 +101,37 @@ export default async function vote(prevState: PrevState, formData: FormData) {
         );
     }
 
-    const difference = valueOf(newVote) - valueOf(existingVote?.value);
+    const calculateDelta = (reference: (PrevState["value"] & {}) | "down") => {
+      return (
+        (newVote?.startsWith(reference) ? 1 : 0) -
+        (existingVote?.value.startsWith(reference) ? 1 : 0)
+      );
+    };
 
     await tx
       .update(target.contentTable)
-      .set({ score: sql`${target.contentTable.score} + ${difference}` })
+      .set({
+        upvoteCount: increment(
+          target.contentTable.upvoteCount,
+          calculateDelta("up"),
+        ),
+        downvoteIncorrectCount: increment(
+          target.contentTable.downvoteIncorrectCount,
+          calculateDelta("down.incorrect"),
+        ),
+        downvoteHarmfulCount: increment(
+          target.contentTable.downvoteHarmfulCount,
+          calculateDelta("down.harmful"),
+        ),
+        downvoteSpamCount: increment(
+          target.contentTable.downvoteSpamCount,
+          calculateDelta("down.spam"),
+        ),
+      })
       .where(eq(target.contentTable.id, target.contentId));
 
     return {
-      score: prevState.score + difference,
+      score: prevState.score + calculateDelta("up") - calculateDelta("down"),
       value: newVote,
     } satisfies PrevState;
   });

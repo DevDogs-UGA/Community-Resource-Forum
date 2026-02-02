@@ -40,20 +40,6 @@ export default async function ProfilePage({
         (org) => org.organizationId === profileId && org.role !== "member",
       ));
 
-  if (!session) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <h1 className="mb-4 text-xl font-semibold">You must be signed in</h1>
-        <Link
-          href="/"
-          className="rounded-md bg-sky-700 px-4 py-2 text-white hover:bg-sky-600"
-        >
-          Go Home
-        </Link>
-      </div>
-    );
-  }
-
   const [profile] = await db
     .select()
     .from(profiles)

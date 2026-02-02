@@ -10,7 +10,8 @@ import type { EmitterSource } from "react-quill-new";
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 export default function PostEditor() {
-  const [value, setValue] = useState("{}");
+  const [deltaContent, setDeltaContent] = useState("{}");
+  const [textContent, setTextContent] = useState("");
 
   const handleChange = useCallback(
     (
@@ -19,7 +20,8 @@ export default function PostEditor() {
       _source: EmitterSource,
       editor: RQ.UnprivilegedEditor,
     ) => {
-      setValue(JSON.stringify(editor.getContents().ops));
+      setTextContent(editor.getText());
+      setDeltaContent(JSON.stringify(editor.getContents().ops));
     },
     [],
   );
@@ -31,7 +33,8 @@ export default function PostEditor() {
       </label>
 
       <div className="relative -mx-8 bg-gray-200 px-8 py-4">
-        <input type="hidden" name="content" value={value} readOnly />
+        <input type="hidden" name="content" value={deltaContent} readOnly />
+        <input type="hidden" name="textContent" value={textContent} readOnly />
         <ReactQuill
           className="mx-auto flex h-64 w-full max-w-xl flex-col rounded-sm border border-gray-400 bg-white shadow-xs ring ring-transparent focus-within:ring-sky-600"
           theme="snow"

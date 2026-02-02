@@ -17,10 +17,15 @@ interface Props {
   tags: Tag[];
 }
 
-export default function SelectTags({ tags }: Props) {
+export default function SelectTags({ tags: unorderedTags }: Props) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Tag[]>([]);
   const id = useId();
+    
+  const tags = useMemo(
+    () => unorderedTags.toSorted((a, b) => a.lft - b.lft),
+    [unorderedTags],
+  );
 
   const queryResults = useMemo(
     () =>

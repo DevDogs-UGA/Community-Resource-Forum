@@ -1,17 +1,24 @@
 import { eq } from "drizzle-orm";
-import { google } from "googleapis";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
+import * as z from "zod";
+import { env } from "~/env";
 import { db } from "~/server/db";
 import { profiles, sessions, users } from "~/server/db/schema";
-import { env } from "~/env";
 
-export const googleOAuth2 = new google.auth.OAuth2(
-  env.AUTH_GOOGLE_ID,
-  env.AUTH_GOOGLE_SECRET,
-  env.AUTH_REDIRECT_URL,
-);
+export function authenticate(): never {
+  redirect(
+    new URL(
+      "?" +
+        new URLSearchParams({
+          client_id: env.AUTH_CLIENT_ID,
+          redirect_uri: env.AUTH_REDIRECT_URI,
+        }).toString(),
+      env.AUTH_ENDPOINT,
+    ).toString(),
+  );
+}
 
 /**
  * Gets the currently signed in user.
@@ -43,6 +50,52 @@ export async function getSessionUser<
   return session ?? null;
 }
 
+/**
+ * Gets the currently signed in user.
+ * @param include Specify data to include or exclude for the signed-in user using a Drizzle soft-relation query.
+ * @returns The session data. If there is no session present, the user is redirected to the sign-in page.
+ */
+export async function expectSessionUser<
+  T extends Exclude<
+    ((Parameters<typeof db.query.sessions.findFirst>[0] & {})["with"] & {
+      // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+      user: {};
+    })["user"],
+    true
+  >,
+>(include?: T) {
+  const token = (await cookies()).get("session")?.value;
+
+  if (!token) {
+    authenticate();
+  }
+
+  const session = await db.query.sessions.findFirst({
+    where: eq(sessions.token, token),
+    with: {
+      user: include ?? true,
+    },
+  });
+
+  if (!session) {
+    authenticate();
+  }
+
+  return session;
+}
+
+const profileDataSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.email().nullish(),
+  image: z.url().nullish(),
+  githubUsername: z.string().nullish(),
+  discordUsername: z.string().nullish(),
+  linkedinUsername: z.string().nullish(),
+  instagramUsername: z.string().nullish(),
+  portfolioUrl: z.url().nullish(),
+});
+
 export async function handleOAuthRedirect(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
 
@@ -50,23 +103,24 @@ export async function handleOAuthRedirect(request: NextRequest) {
     notFound();
   }
 
-  const { tokens } = await googleOAuth2.getToken(code);
-  googleOAuth2.setCredentials(tokens);
+  const profile = await fetch(env.AUTH_ENDPOINT, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: env.AUTH_CLIENT_ID,
+      client_secret: env.AUTH_CLIENT_SECRET,
+      code: code,
+      grant_type: "authorization_code",
+      redirect_uri: env.AUTH_REDIRECT_URI,
+    }).toString(),
+  })
+    .then((res) => res.json())
+    .then((obj) => profileDataSchema.parseAsync(obj));
 
-  const profile = await google
-    .oauth2({
-      version: "v2",
-      auth: googleOAuth2,
-    })
-    .userinfo.get({
-      fields: "name,email",
-    });
-
-  if (!profile.data.email) {
-    notFound();
-  }
-
-  const email = profile.data.email;
+  const email = profile.id + "@uga.edu";
 
   const { id } =
     (await db.query.users.findFirst({
@@ -76,8 +130,8 @@ export async function handleOAuthRedirect(request: NextRequest) {
       const [insertedProfile] = await tx
         .insert(profiles)
         .values({
-          name: profile.data.name ?? "UGA Student",
-          image: profile.data.picture,
+          name: profile.name ?? "UGA Student",
+          image: profile.image,
           type: "user",
         })
         .$returningId();

@@ -13,6 +13,21 @@ const config = {
         destination: "/api/auth",
         permanent: true,
       },
+      {
+        source: "/",
+        destination: "/posts",
+        permanent: false,
+      },
+      {
+        source: "/moderate",
+        destination: "/moderate/review/posts",
+        permanent: false,
+      },
+      {
+        source: "/moderate/review",
+        destination: "/moderate/review/posts",
+        permanent: false,
+      },
     ];
   },
 };
