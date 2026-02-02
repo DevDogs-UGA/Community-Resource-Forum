@@ -81,7 +81,7 @@ export default function VoteButton({ target, score, value, ...props }: Props) {
       {/* disabled:text-gray-600 data-[active=true]:disabled:text-emerald-800 */}
       <fieldset
         className="flex items-center gap-1 disabled:pointer-events-none disabled:opacity-60"
-        disabled={disabled}
+        {...props} 
       >
         <button
           className="group text-[2em] leading-none transition-colors hover:text-green-700 data-[active=true]:text-green-700"
