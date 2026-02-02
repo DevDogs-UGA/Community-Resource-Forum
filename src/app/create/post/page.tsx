@@ -4,6 +4,7 @@ import { QuillDeltaToHtmlConverter } from "quill-delta-to-html";
 import { PiPaperPlaneTiltBold, PiUsersBold } from "react-icons/pi";
 import * as z from "zod";
 import * as zfd from "zod-form-data";
+import ImageUploadGallery from "~/components/ImageUploadGallery";
 import PostEditor from "~/components/PostEditor";
 import SelectEvent from "~/components/SelectEvent";
 import SelectProfile from "~/components/SelectProfile";
@@ -16,6 +17,13 @@ const schema = zfd.formData({
   authorId: zfd.text(),
   tagId: zfd.repeatableOfType(zfd.text()),
   eventId: zfd.text(z.string().optional()),
+  imageUrls: zfd.text().transform((s) => {
+    try {
+      return JSON.parse(s) as string[];
+    } catch {
+      return [];
+    }
+  }),
   content: zfd.text().transform((s, ctx) => {
     try {
       const obj: unknown = JSON.parse(s);
@@ -139,6 +147,7 @@ export default async function CreatePost() {
       </div>
 
       <SelectTags tags={tags} />
+      <ImageUploadGallery maxImages={4} maxSizeMB={10} />
       <PostEditor />
       <SelectEvent events={events} />
 
