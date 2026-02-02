@@ -1,5 +1,5 @@
 Reading schema files:
-/Users/rayanbatada/Desktop/codes/Current/devdogs/Community-Resource-Forum/src/server/db/schema.ts
+/home/sloan/DevDogs-UGA/Community-Resource-Forum/src/server/db/schema.ts
 
 CREATE TABLE `commentVote` (
 	`userId` varchar(255) NOT NULL,
@@ -11,11 +11,16 @@ CREATE TABLE `commentVote` (
 CREATE TABLE `comments` (
 	`id` varchar(255) NOT NULL,
 	`content` text NOT NULL,
-	`score` int NOT NULL DEFAULT 0,
-	`archived` boolean NOT NULL DEFAULT false,
+	`quarantined` boolean NOT NULL DEFAULT false,
 	`authorId` varchar(255) NOT NULL,
 	`postId` varchar(255) NOT NULL,
 	`replyCount` int NOT NULL DEFAULT 0,
+	`upvoteCount` int NOT NULL DEFAULT 0,
+	`downvoteIncorrectCount` int NOT NULL DEFAULT 0,
+	`downvoteHarmfulCount` int NOT NULL DEFAULT 0,
+	`downvoteSpamCount` int NOT NULL DEFAULT 0,
+	`downvoteCount` int GENERATED ALWAYS AS (`comments`.`downvoteIncorrectCount` + `comments`.`downvoteHarmfulCount` + `comments`.`downvoteSpamCount`) VIRTUAL NOT NULL,
+	`score` int GENERATED ALWAYS AS (`comments`.`upvoteCount` - `comments`.`downvoteCount`) VIRTUAL NOT NULL,
 	`parentId` varchar(255),
 	`createdAt` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `comments_id` PRIMARY KEY(`id`)
@@ -29,14 +34,8 @@ CREATE TABLE `event` (
 	`end` datetime NOT NULL,
 	`allDay` boolean NOT NULL,
 	`location` varchar(255),
+	`tags` json,
 	CONSTRAINT `event_id` PRIMARY KEY(`id`)
-);
-
-CREATE TABLE `flags` (
-	`userId` varchar(255) NOT NULL,
-	`postId` varchar(255) NOT NULL,
-	`createdAt` timestamp NOT NULL DEFAULT (now()),
-	CONSTRAINT `flags_userId_postId_pk` PRIMARY KEY(`userId`,`postId`)
 );
 
 CREATE TABLE `organization` (
@@ -56,10 +55,16 @@ CREATE TABLE `postVote` (
 CREATE TABLE `post` (
 	`id` varchar(255) NOT NULL,
 	`content` text,
+	`textContent` text,
 	`authorId` varchar(255) NOT NULL,
 	`eventId` varchar(255),
-	`score` int NOT NULL DEFAULT 0,
-	`archived` boolean NOT NULL DEFAULT false,
+	`upvoteCount` int NOT NULL DEFAULT 0,
+	`downvoteIncorrectCount` int NOT NULL DEFAULT 0,
+	`downvoteHarmfulCount` int NOT NULL DEFAULT 0,
+	`downvoteSpamCount` int NOT NULL DEFAULT 0,
+	`downvoteCount` int GENERATED ALWAYS AS (`post`.`downvoteIncorrectCount` + `post`.`downvoteHarmfulCount` + `post`.`downvoteSpamCount`) VIRTUAL NOT NULL,
+	`score` int GENERATED ALWAYS AS (`post`.`upvoteCount` - `post`.`downvoteCount`) VIRTUAL NOT NULL,
+	`quarantined` boolean NOT NULL DEFAULT false,
 	`commentCount` int NOT NULL DEFAULT 0,
 	`flagCount` int NOT NULL DEFAULT 0,
 	`createdAt` timestamp NOT NULL DEFAULT (now()),
@@ -114,6 +119,7 @@ CREATE TABLE `tags_to_posts` (
 CREATE TABLE `user` (
 	`id` varchar(255) NOT NULL,
 	`email` varchar(255) NOT NULL,
+	`role` enum('user','moderator') NOT NULL DEFAULT 'user',
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT `user_id` PRIMARY KEY(`id`),
@@ -126,8 +132,6 @@ ALTER TABLE `comments` ADD CONSTRAINT `comments_authorId_profile_id_fk` FOREIGN 
 ALTER TABLE `comments` ADD CONSTRAINT `comments_postId_post_id_fk` FOREIGN KEY (`postId`) REFERENCES `post`(`id`) ON DELETE no action ON UPDATE no action;
 ALTER TABLE `comments` ADD CONSTRAINT `comments_parentId_comments_id_fk` FOREIGN KEY (`parentId`) REFERENCES `comments`(`id`) ON DELETE no action ON UPDATE no action;
 ALTER TABLE `event` ADD CONSTRAINT `event_organizerId_profile_id_fk` FOREIGN KEY (`organizerId`) REFERENCES `profile`(`id`) ON DELETE no action ON UPDATE no action;
-ALTER TABLE `flags` ADD CONSTRAINT `flags_userId_user_id_fk` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE cascade ON UPDATE no action;
-ALTER TABLE `flags` ADD CONSTRAINT `flags_postId_post_id_fk` FOREIGN KEY (`postId`) REFERENCES `post`(`id`) ON DELETE cascade ON UPDATE no action;
 ALTER TABLE `organization` ADD CONSTRAINT `organization_organizationId_profile_id_fk` FOREIGN KEY (`organizationId`) REFERENCES `profile`(`id`) ON DELETE no action ON UPDATE no action;
 ALTER TABLE `organization` ADD CONSTRAINT `organization_userId_user_id_fk` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE no action ON UPDATE no action;
 ALTER TABLE `postVote` ADD CONSTRAINT `postVote_userId_user_id_fk` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE no action ON UPDATE no action;

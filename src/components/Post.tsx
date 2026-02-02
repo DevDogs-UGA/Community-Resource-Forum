@@ -37,7 +37,8 @@ export default function Post({
   return (
     <article
       key={post.id}
-      className="rounded-md border border-gray-300 bg-white px-2"
+      className="rounded-md border border-gray-300 bg-white px-2 data-readonly:border-0"
+      data-readonly={readonly || undefined}
     >
       <div className="flex flex-col gap-2 px-2 py-4">
         <div className="flex items-start justify-between">
@@ -57,14 +58,6 @@ export default function Post({
               </span>
             </Link>
           </div>
-
-          {session && (
-            <FlagButton
-              postId={post.id}
-              userId={session.userId}
-              disabled={readonly}
-            />
-          )}
         </div>
 
         {post.content && (

@@ -7,11 +7,10 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    AUTH_GOOGLE_ID: z.string(),
-    AUTH_GOOGLE_SECRET: z.string(),
-    AUTH_REDIRECT_URL: z
-      .string()
-      .default("http://localhost:3000/api/auth/callback/google"),
+    AUTH_ENDPOINT: z.url().default("https://devdogsuga.org/api/auth"),
+    AUTH_CLIENT_ID: z.string(),
+    AUTH_CLIENT_SECRET: z.string(),
+    AUTH_REDIRECT_URI: z.url().default("http://localhost:3000/api/auth"),
     MYSQL_USER: (process.env.VERCEL_ENV &&
     process.env.VERCEL_ENV !== "development"
       ? z.string()
@@ -45,9 +44,10 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
-    AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
-    AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
-    AUTH_REDIRECT_URL: process.env.AUTH_REDIRECT_URL,
+    AUTH_CLIENT_ID: process.env.AUTH_CLIENT_ID,
+    AUTH_CLIENT_SECRET: process.env.AUTH_CLIENT_SECRET,
+    AUTH_ENDPOINT: process.env.AUTH_ENDPOINT,
+    AUTH_REDIRECT_URI: process.env.AUTH_REDIRECT_URI,
     MYSQL_USER: process.env.MYSQL_USER,
     MYSQL_PASSWORD: process.env.MYSQL_PASSWORD,
     MYSQL_HOST: process.env.MYSQL_HOST,

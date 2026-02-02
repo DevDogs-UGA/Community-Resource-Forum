@@ -8,7 +8,7 @@ import PostEditor from "~/components/PostEditor";
 import SelectEvent from "~/components/SelectEvent";
 import SelectProfile from "~/components/SelectProfile";
 import SelectTags from "~/components/SelectTags";
-import { getSessionUser } from "~/server/auth";
+import { expectSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
 import { posts, tags as tagsTable, tagsToPosts } from "~/server/db/schema";
 
@@ -37,7 +37,7 @@ const schema = zfd.formData({
 export default async function CreatePost() {
   const tags = await db.select().from(tagsTable).orderBy(asc(tagsTable.lft));
 
-  const session = await getSessionUser({
+  const session = await expectSessionUser({
     with: {
       profile: {
         with: {
@@ -58,10 +58,6 @@ export default async function CreatePost() {
 
   async function action(data: FormData) {
     "use server";
-
-    if (session === null) {
-      redirect("/sign-in");
-    }
 
     const {
       content,
@@ -107,10 +103,6 @@ export default async function CreatePost() {
     });
 
     redirect("/");
-  }
-
-  if (session === null) {
-    redirect("/sign-in");
   }
 
   const organizationProfiles = session.user.organizations

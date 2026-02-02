@@ -11,6 +11,7 @@ import {
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm/relations";
 import { lower } from "./utils";
+import { type SQL, sql } from "drizzle-orm";
 
 export const events = mysqlTable("event", (d) => ({
   id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
@@ -45,8 +46,24 @@ export const posts = mysqlTable(
       .notNull()
       .references(() => profiles.id),
     eventId: d.varchar({ length: 255 }).references(() => events.id),
-    score: d.int().notNull().default(0),
-    archived: d.boolean().notNull().default(false),
+    upvoteCount: d.int().notNull().default(0),
+    downvoteIncorrectCount: d.int().notNull().default(0),
+    downvoteHarmfulCount: d.int().notNull().default(0),
+    downvoteSpamCount: d.int().notNull().default(0),
+    downvoteCount: d
+      .int()
+      .notNull()
+      .generatedAlwaysAs(
+        (): SQL =>
+          sql`${posts.downvoteIncorrectCount} + ${posts.downvoteHarmfulCount} + ${posts.downvoteSpamCount}`,
+      ),
+    score: d
+      .int()
+      .notNull()
+      .generatedAlwaysAs(
+        (): SQL => sql`${posts.upvoteCount} - ${posts.downvoteCount}`,
+      ),
+    quarantined: d.boolean().notNull().default(false),
     commentCount: d.int().notNull().default(0),
     flagCount: d.int().notNull().default(0),
     createdAt: d.timestamp().defaultNow().notNull(),
@@ -57,7 +74,6 @@ export const posts = mysqlTable(
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
   tags: many(tagsToPosts),
-  flags: many(flags),
   author: one(profiles, {
     fields: [posts.authorId],
     references: [profiles.id],
@@ -105,8 +121,7 @@ export const comments = mysqlTable(
   (d) => ({
     id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
     content: d.text().notNull(),
-    score: d.int().notNull().default(0),
-    archived: d.boolean().notNull().default(false),
+    quarantined: d.boolean().notNull().default(false),
     authorId: d
       .varchar({ length: 255 })
       .notNull()
@@ -116,6 +131,23 @@ export const comments = mysqlTable(
       .notNull()
       .references(() => posts.id),
     replyCount: d.int().notNull().default(0),
+    upvoteCount: d.int().notNull().default(0),
+    downvoteIncorrectCount: d.int().notNull().default(0),
+    downvoteHarmfulCount: d.int().notNull().default(0),
+    downvoteSpamCount: d.int().notNull().default(0),
+    downvoteCount: d
+      .int()
+      .notNull()
+      .generatedAlwaysAs(
+        (): SQL =>
+          sql`${comments.downvoteIncorrectCount} + ${comments.downvoteHarmfulCount} + ${comments.downvoteSpamCount}`,
+      ),
+    score: d
+      .int()
+      .notNull()
+      .generatedAlwaysAs(
+        (): SQL => sql`${comments.upvoteCount} - ${comments.downvoteCount}`,
+      ),
     parentId: d.varchar({ length: 255 }),
     createdAt: d.timestamp().defaultNow().notNull(),
   }),
@@ -234,6 +266,7 @@ export const users = mysqlTable(
       .primaryKey()
       .references(() => profiles.id),
     email: varchar("email", { length: 255 }).notNull(),
+    role: d.mysqlEnum(["user", "moderator"]).default("user").notNull(),
     createdAt: d.timestamp("created_at").defaultNow().notNull(),
     updatedAt: d.timestamp("updated_at").onUpdateNow(),
   }),
@@ -248,7 +281,6 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   subscriptions: many(subscriptions),
   organizations: many(organizations),
   sessions: many(sessions),
-  flags: many(flags),
 }));
 
 export const subscriptions = mysqlTable(
@@ -328,32 +360,5 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
     fields: [sessions.userId],
     references: [users.id],
-  }),
-}));
-
-export const flags = mysqlTable(
-  "flags",
-  (d) => ({
-    userId: d
-      .varchar({ length: 255 })
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    postId: d
-      .varchar({ length: 255 })
-      .notNull()
-      .references(() => posts.id, { onDelete: "cascade" }),
-    createdAt: d.timestamp().defaultNow().notNull(),
-  }),
-  (t) => [primaryKey({ columns: [t.userId, t.postId] })], // max one flag per user per post
-);
-
-export const flagRelations = relations(flags, ({ one }) => ({
-  user: one(users, {
-    fields: [flags.userId],
-    references: [users.id],
-  }),
-  post: one(posts, {
-    fields: [flags.postId],
-    references: [posts.id],
   }),
 }));

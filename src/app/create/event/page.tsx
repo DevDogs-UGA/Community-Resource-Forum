@@ -11,7 +11,7 @@ import * as z from "zod";
 import * as zfd from "zod-form-data";
 import SelectDateTimeRange from "~/components/SelectDateTimeRange";
 import SelectProfile from "~/components/SelectProfile";
-import { getSessionUser } from "~/server/auth";
+import { expectSessionUser } from "~/server/auth";
 import { db } from "~/server/db";
 import { events } from "~/server/db/schema";
 
@@ -45,7 +45,7 @@ const schema = zfd.formData(
 );
 
 export default async function CreateEvent() {
-  const session = await getSessionUser({
+  const session = await expectSessionUser({
     with: {
       profile: {
         with: {
@@ -66,10 +66,6 @@ export default async function CreateEvent() {
 
   async function action(data: FormData) {
     "use server";
-
-    if (session === null) {
-      redirect("/");
-    }
 
     const { organizerId, title, location, ...dateTime } =
       await schema.parseAsync(data);
@@ -111,10 +107,6 @@ export default async function CreateEvent() {
       .$returningId();
 
     redirect("/create/post");
-  }
-
-  if (session === null) {
-    redirect("/sign-in");
   }
 
   const organizationProfiles = session.user.organizations

@@ -45,7 +45,7 @@ interface CommentWithJoins extends Comment {
 
 interface CommentProps extends CommentWithJoins {
   profiles?: Readonly<[Profile, ...Profile[]]>;
-  sortBy: "popularity" | "recent";
+  sortBy: "popular" | "recent";
 }
 
 function Comment({
@@ -154,7 +154,7 @@ function Comment({
 }
 
 const sort = {
-  popularity: desc(sql`${comments.score} + ${comments.replyCount}`),
+  popular: desc(sql`${comments.score} + ${comments.replyCount}`),
   recent: desc(comments.createdAt),
 };
 
@@ -166,9 +166,9 @@ const SearchParams = z.promise(
         z
           .string()
           .toLowerCase()
-          .pipe(z.literal(["popularity", "recent"])),
+          .pipe(z.literal(["popular", "recent"])),
       )
-      .catch("popularity"),
+      .catch("popular"),
     comment: z
       .string()
       .transform(() => true)
@@ -499,11 +499,11 @@ export default async function Page({
                   >
                     <Dropdown.Item asChild>
                       <Link
-                        href={`/discussion/${postId}${parentId ? `${parentId}` : ""}?sortBy=popularity`}
+                        href={`/discussion/${postId}${parentId ? `${parentId}` : ""}?sortBy=popular`}
                         className="flex items-center gap-3 py-1 pr-6 pl-3 transition-colors hover:bg-gray-200"
                       >
                         <PiTrendUp />
-                        Popularity
+                        Popular
                       </Link>
                     </Dropdown.Item>
 
