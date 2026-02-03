@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "~/server/db";
-import { profiles, posts } from "~/server/db/schema";
+import { profiles, posts, savedPosts } from "~/server/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getSessionUser } from "~/server/auth";
 import { notFound } from "next/navigation";
@@ -10,8 +10,10 @@ import { notFound } from "next/navigation";
 
 export default async function ProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ profileId: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const session = await getSessionUser({
     with: {
@@ -32,6 +34,9 @@ export default async function ProfilePage({
     },
   });
   const { profileId } = await params;
+  const { tab } = await searchParams;
+  const activeTab = tab === "saved" ? "saved" : "posts";
+  const isOwnProfile = session?.userId === profileId;
 
   const isSignedIn =
     session &&
@@ -69,6 +74,16 @@ export default async function ProfilePage({
     .from(posts)
     .where(eq(posts.authorId, profile.id))
     .orderBy(desc(posts.createdAt));
+
+  // Only fetch saved posts if viewing own profile
+  const savedPostsResult = isOwnProfile
+    ? await db
+        .select({ post: posts })
+        .from(savedPosts)
+        .innerJoin(posts, eq(posts.id, savedPosts.postId))
+        .where(eq(savedPosts.userId, session.userId))
+        .orderBy(desc(savedPosts.createdAt))
+    : [];
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -145,35 +160,106 @@ export default async function ProfilePage({
         </div>
 
         <div className="md:col-span-2">
-          <h2 className="mb-4 text-xl font-semibold">Posts</h2>
-          {postsResult.length === 0 ? (
-            <div className="text-gray-600">No posts yet.</div>
-          ) : (
-            <div className="space-y-4">
-              {postsResult.map((post) => {
-                const created = post.createdAt
-                  ? new Date(post.createdAt).toLocaleString()
-                  : "";
-                return (
-                  <article
-                    key={post.id}
-                    className="rounded-xl border bg-white p-4 shadow-sm"
-                  >
-                    <div className="mb-2 flex items-start justify-between">
-                      <div className="text-sm text-gray-600">
-                        Posted {created}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {post.score} points • {post.commentCount} comments
-                      </div>
-                    </div>
-                    <div className="whitespace-pre-wrap text-gray-800">
-                      {post.content}
-                    </div>
-                  </article>
-                );
-              })}
+          {/* Tabs - only show if viewing own profile */}
+          {isOwnProfile && (
+            <div className="mb-4 flex border-b border-gray-200">
+              <Link
+                href={`/profile/${profileId}`}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === "posts"
+                    ? "border-b-2 border-sky-700 text-sky-700"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Posts
+              </Link>
+              <Link
+                href={`/profile/${profileId}?tab=saved`}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === "saved"
+                    ? "border-b-2 border-sky-700 text-sky-700"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Saved Posts
+              </Link>
             </div>
+          )}
+
+          {!isOwnProfile && (
+            <h2 className="mb-4 text-xl font-semibold">Posts</h2>
+          )}
+
+          {activeTab === "posts" ? (
+            <>
+              {postsResult.length === 0 ? (
+                <div className="text-gray-600">No posts yet.</div>
+              ) : (
+                <div className="space-y-4">
+                  {postsResult.map((post) => {
+                    const created = post.createdAt
+                      ? new Date(post.createdAt).toLocaleString()
+                      : "";
+                    return (
+                      <article
+                        key={post.id}
+                        className="rounded-xl border bg-white p-4 shadow-sm"
+                      >
+                        <div className="mb-2 flex items-start justify-between">
+                          <div className="text-sm text-gray-600">
+                            Posted {created}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {post.score} points • {post.commentCount} comments
+                          </div>
+                        </div>
+                        <div className="whitespace-pre-wrap text-gray-800">
+                          {post.content}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {savedPostsResult.length === 0 ? (
+                <div className="text-gray-600">No saved posts yet.</div>
+              ) : (
+                <div className="space-y-4">
+                  {savedPostsResult.map(({ post }) => {
+                    const created = post.createdAt
+                      ? new Date(post.createdAt).toLocaleString()
+                      : "";
+                    return (
+                      <article
+                        key={post.id}
+                        className="rounded-xl border bg-white p-4 shadow-sm"
+                      >
+                        <div className="mb-2 flex items-start justify-between">
+                          <div className="text-sm text-gray-600">
+                            Posted {created}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {post.score} points • {post.commentCount} comments
+                          </div>
+                        </div>
+                        <div className="whitespace-pre-wrap text-gray-800">
+                          {post.content}
+                        </div>
+                        <Link
+                          href={`/discussion/${post.id}`}
+                          className="mt-2 inline-block text-sm text-sky-700 hover:underline"
+                        >
+                          View discussion →
+                        </Link>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
