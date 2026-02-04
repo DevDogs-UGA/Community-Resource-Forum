@@ -189,7 +189,7 @@ export const users = mysqlTable(
       .primaryKey()
       .references(() => profiles.id),
     email: d.varchar({ length: 255 }).notNull(),
-    role: d.mysqlEnum(["user", "moderator"]).default("user").notNull(),
+    role: d.mysqlEnum(["user", "moderator"]).notNull(),
     createdAt: d.timestamp("created_at").defaultNow().notNull(),
     updatedAt: d.timestamp("updated_at").onUpdateNow(),
   }),

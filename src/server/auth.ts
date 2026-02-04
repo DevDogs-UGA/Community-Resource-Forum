@@ -142,6 +142,7 @@ export async function handleOAuthRedirect(request: NextRequest) {
 
     await tx.insert(users).values({
       profileId: insertedProfile.id,
+      role: "user",
       email,
     });
 
