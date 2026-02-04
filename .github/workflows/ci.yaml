@@ -27,7 +27,7 @@ jobs:
         run: |
           SKIP_ENV_VALIDATION=true pnpm turbo build
           pnpm dlx vercel env pull ${{ env.ENV_CONFIG }} --token=${{ secrets.VERCEL_TOKEN }} .env
-          pnpm dlx dotenv-cli -- sh -c 'atlas schema apply --config file://migrations/atlas.hcl --env remote --dev-url docker://mysql/8/example --url mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_DATABASE --dry-run'
+          pnpm dlx dotenv-cli -- sh -c 'atlas schema apply --config ./volumes/atlas/atlas.hcl --env remote --dev-url docker://mysql/8/example --url mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_DATABASE --dry-run'
         env:
           ENV_CONFIG: ${{ (env.REF == 'main' && '--environment=production') || format('--environment=preview --git-branch={0}', env.REF) }}
       - name: Deploy Project (for Pushes)
@@ -36,7 +36,7 @@ jobs:
           pnpm dlx vercel pull ${{ env.ENV_CONFIG }} --yes --git-branch=${{ github.base_ref }} --token=${{ secrets.VERCEL_TOKEN }}
           pnpm dlx vercel env pull ${{ env.ENV_CONFIG }} --token=${{ secrets.VERCEL_TOKEN }} .env
           pnpm db:generate
-          pnpm dlx dotenv-cli -- sh -c 'atlas schema apply --config file://migrations/atlas.hcl --env remote --dev-url docker://mysql/8/example --url mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_DATABASE --auto-approve'
+          pnpm dlx dotenv-cli -- sh -c 'atlas schema apply --config ./volumes/atlas/atlas.hcl --env remote --dev-url docker://mysql/8/example --url mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_DATABASE --auto-approve'
           pnpm dlx dotenv-cli -- pnpm dlx tsx addTagsToDatabase.ts
           pnpm dlx vercel build ${{ env.BUILD_CONFIG }} --token=${{ secrets.VERCEL_TOKEN }}
           pnpm dlx vercel deploy ${{ env.BUILD_CONFIG }} --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
