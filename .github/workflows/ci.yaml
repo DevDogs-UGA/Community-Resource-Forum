@@ -33,7 +33,6 @@ jobs:
       - name: Deploy Project (for Pushes)
         if: ${{ github.event_name == 'push' }}
         run: |
-          pnpm dlx vercel pull ${{ env.ENV_CONFIG }} --yes --git-branch=${{ github.base_ref }} --token=${{ secrets.VERCEL_TOKEN }}
           pnpm dlx vercel env pull ${{ env.ENV_CONFIG }} --token=${{ secrets.VERCEL_TOKEN }} .env
           pnpm db:generate
           pnpm dlx dotenv-cli -- sh -c 'atlas schema apply --config file://volumes/atlas/atlas.hcl --env remote --dev-url docker://mysql/8/example --url mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_DATABASE --auto-approve'

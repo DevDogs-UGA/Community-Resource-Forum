@@ -16,9 +16,13 @@ export const env = createEnv({
     AUTH_ENDPOINT: z.url().default("https://devdogsuga.org/api/auth"),
     AUTH_CLIENT_ID: z.string(),
     AUTH_CLIENT_SECRET: z.string(),
-    AUTH_REDIRECT_URI: z
-      .url()
-      .default(`http://localhost:${process.env.PORT ?? 3000}/api/auth`),
+    AUTH_REDIRECT_URI: switchEnvironment({
+      local: z.url().default(`http://localhost:${process.env.PORT ?? 3000}`),
+      vercel: z
+        .string()
+        .transform((str) => "https://" + str)
+        .pipe(z.url()),
+    }),
     MYSQL_USER: switchEnvironment({
       local: z.string().default("root"),
       vercel: z.string(),
@@ -60,7 +64,11 @@ export const env = createEnv({
       vercel: process.env.SHARED_AUTH_CLIENT_SECRET,
     }),
     AUTH_ENDPOINT: process.env.AUTH_ENDPOINT,
-    AUTH_REDIRECT_URI: process.env.AUTH_REDIRECT_URI,
+    AUTH_REDIRECT_URI:
+      process.env.AUTH_REDIRECT_URI ??
+      (process.env.VERCEL_ENV === "production"
+        ? process.env.VERCEL_PROJECT_PRODUCTION_URL
+        : process.env.VERCEL_URL),
     MYSQL_USER: process.env.MYSQL_USER,
     MYSQL_PASSWORD: process.env.MYSQL_PASSWORD,
     MYSQL_HOST: process.env.MYSQL_HOST,
