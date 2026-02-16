@@ -12,7 +12,7 @@ export function authenticate(): never {
       "?" +
         new URLSearchParams({
           client_id: env.AUTH_CLIENT_ID,
-          redirect_uri: env.AUTH_REDIRECT_URI,
+          redirect_uri: new URL("/api/auth", env.AUTH_REDIRECT_URI).toString(),
         }).toString(),
       env.AUTH_ENDPOINT,
     ).toString(),
@@ -105,7 +105,7 @@ export async function handleOAuthRedirect(request: NextRequest) {
       client_secret: env.AUTH_CLIENT_SECRET,
       code: code,
       grant_type: "authorization_code",
-      redirect_uri: env.AUTH_REDIRECT_URI,
+      redirect_uri: new URL("/api/auth", env.AUTH_REDIRECT_URI).toString(),
     }).toString(),
   })
     .then((res) => res.json())
