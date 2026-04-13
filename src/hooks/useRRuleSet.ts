@@ -60,7 +60,7 @@ interface RepeatExactly {
 interface RRuleOptions {
   interval: number;
   startDay: Day;
-  time?: Time;
+  startTime?: Time;
   includeDays: Day[];
   excludeDays: Day[];
   recurrence:
@@ -89,8 +89,8 @@ function uppercase<S extends string>(s: S) {
 }
 
 function compileRRule(options: RRuleOptions) {
-  const dtstart = options.startDay.toUTCDatetime(options.time);
-  const localStart = options.startDay.toLocalDatetime(options.time);
+  const dtstart = options.startDay.toUTCDatetime(options.startTime);
+  const localStart = options.startDay.toLocalDatetime(options.startTime);
 
   const rrule: Partial<LibOptions> = {
     dtstart,
@@ -125,7 +125,7 @@ function compileRRule(options: RRuleOptions) {
   }
 
   if (options.repeat.condition === "until") {
-    rrule.until = options.repeat.until.toUTCDatetime(options.time);
+    rrule.until = options.repeat.until.toUTCDatetime(options.startTime);
   }
 
   if (options.repeat.condition === "exactly") {
@@ -155,7 +155,7 @@ function createRRulePresets(startDay: Day, time?: Time) {
       enabled: true,
       options: {
         startDay,
-        time,
+        startTime: time,
         interval: 1,
         recurrence: {
           frequency: "daily",
@@ -171,7 +171,7 @@ function createRRulePresets(startDay: Day, time?: Time) {
       enabled: true,
       options: {
         startDay,
-        time,
+        startTime: time,
         interval: 1,
         recurrence: {
           frequency: "weekly",
@@ -188,7 +188,7 @@ function createRRulePresets(startDay: Day, time?: Time) {
       enabled: true,
       options: {
         startDay,
-        time,
+        startTime: time,
         interval: 1,
         recurrence: {
           frequency: "weekly",
@@ -205,7 +205,7 @@ function createRRulePresets(startDay: Day, time?: Time) {
       enabled: true,
       options: {
         startDay,
-        time,
+        startTime: time,
         interval: 1,
         recurrence: {
           frequency: "monthly",
@@ -232,7 +232,7 @@ function createRRulePresets(startDay: Day, time?: Time) {
         }),
       options: {
         startDay,
-        time,
+        startTime: time,
         interval: 1,
         recurrence: {
           frequency: "monthly",
@@ -249,7 +249,7 @@ function createRRulePresets(startDay: Day, time?: Time) {
       enabled: true,
       options: {
         startDay,
-        time,
+        startTime: time,
         interval: 1,
         recurrence: {
           frequency: "monthly",
@@ -266,7 +266,7 @@ function createRRulePresets(startDay: Day, time?: Time) {
       enabled: startDay.getDate() >= 28,
       options: {
         startDay,
-        time,
+        startTime: time,
         interval: 1,
         recurrence: {
           frequency: "monthly",
@@ -300,49 +300,64 @@ function updateKey<K extends keyof RRuleOptions>(
   return action;
 }
 
-export default function useRRuleSet(startDay: Day, time?: Time) {
+type PresetKeys = keyof ReturnType<typeof createRRulePresets>;
+
+type DefaultValue = {
+  startDay: Day;
+  startTime?: Time;
+} & (
+  | { type?: "preset"; preset?: keyof PresetKeys }
+  | ({ type: "custom" } & RRuleOptions)
+);
+
+export default function useRRuleSet(defaultValue: DefaultValue) {
   const rrulePresets = useMemo(
-    () => createRRulePresets(startDay, time),
-    [startDay, time],
+    () => createRRulePresets(defaultValue.startDay, defaultValue.startTime),
+    [defaultValue],
   );
 
   const [type, setType] = useState<"preset" | "custom">("preset");
-  const [preset, setPreset] =
-    useState<keyof ReturnType<typeof createRRulePresets>>("none");
+  const [preset, setPreset] = useState<PresetKeys>("none");
 
   const [options, updateOptions] = useReducer<RRuleOptions, [ActionRecord]>(
     (prevState, action): RRuleOptions => ({
       interval: updateKey("interval", prevState, action),
       startDay: updateKey("startDay", prevState, action),
-      time: updateKey("time", prevState, action),
+      startTime: updateKey("startTime", prevState, action),
       includeDays: updateKey("includeDays", prevState, action),
       excludeDays: updateKey("excludeDays", prevState, action),
       recurrence: updateKey("recurrence", prevState, action),
       repeat: updateKey("repeat", prevState, action),
     }),
-    {
-      startDay,
-      time,
-      interval: 1,
-      recurrence: {
-        frequency: "weekly",
-        weeklyOn: [ALL_WEEKDAYS[getISODay(startDay.toLocalDatetime()) - 1]!],
-      },
-      repeat: {
-        condition: "forever",
-      },
-      includeDays: [],
-      excludeDays: [],
-    },
+    defaultValue?.type === "custom"
+      ? defaultValue
+      : {
+          startDay: defaultValue.startDay,
+          startTime: defaultValue.startTime,
+          interval: 1,
+          recurrence: {
+            frequency: "weekly",
+            weeklyOn: [
+              ALL_WEEKDAYS[
+                getISODay(defaultValue.startDay.toLocalDatetime()) - 1
+              ]!,
+            ],
+          },
+          repeat: {
+            condition: "forever",
+          },
+          includeDays: [],
+          excludeDays: [],
+        },
   );
 
   useEffect(() => {
     if (rrulePresets[preset].options) {
       updateOptions(rrulePresets[preset].options);
     } else {
-      updateOptions({ startDay, time });
+      updateOptions(defaultValue);
     }
-  }, [type, preset, rrulePresets, startDay, time]);
+  }, [type, preset, rrulePresets, defaultValue]);
 
   const rrule = useMemo(
     () =>
@@ -360,11 +375,11 @@ export default function useRRuleSet(startDay: Day, time?: Time) {
     rruleSet.rrule(rrule);
 
     options.includeDays.forEach((d) => {
-      rruleSet.rdate(d.toUTCDatetime(options.time));
+      rruleSet.rdate(d.toUTCDatetime(options.startTime));
     });
 
     options.excludeDays.forEach((d) => {
-      rruleSet.exdate(d.toUTCDatetime(options.time));
+      rruleSet.exdate(d.toUTCDatetime(options.startTime));
     });
 
     return rruleSet;

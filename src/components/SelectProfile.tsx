@@ -32,16 +32,18 @@ interface Props {
   organizationProfiles: Profile[];
   value?: string;
   onChange?: (value: string) => void;
+  defaultValue?: string;
 }
 
 export default function SelectProfile({
   inputName,
   userProfile,
   organizationProfiles,
+  defaultValue,
   value: controlledValue,
   onChange
 }: Props) {
-  const [value, setValue] = useState<string>(userProfile.id);
+  const [value, setValue] = useState<string>(defaultValue ?? userProfile.id);
   const selectedProfile = useMemo(
     () => [userProfile, ...organizationProfiles].find((p) => p.id === value)!,
     [value, userProfile, organizationProfiles],

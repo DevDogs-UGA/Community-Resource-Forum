@@ -1,4 +1,4 @@
-export default async function getFileDetails(file: File) {
+export default async function getFileDetails(file: File, ownerId: string) {
   const buffer = await file.arrayBuffer();
   const digest = await crypto.subtle.digest("SHA-256", buffer);
   const contentHash = Array.from(new Uint8Array(digest))
@@ -6,6 +6,7 @@ export default async function getFileDetails(file: File) {
     .join("");
 
   return {
+    ownerId,
     contentHash,
     name: file.name,
     size: file.size,

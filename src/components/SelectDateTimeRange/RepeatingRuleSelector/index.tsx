@@ -1,31 +1,13 @@
 import * as Menu from "@radix-ui/react-dropdown-menu";
-import { useEffect } from "react";
-import {
-  PiCaretDownBold,
-  PiCaretRightBold,
-  PiCheckBold
-} from "react-icons/pi";
-import type { Day, Time } from "~/lib/Day";
-import useRRuleSet from "~/hooks/useRRuleSet";
+import { PiCaretDownBold, PiCaretRightBold, PiCheckBold } from "react-icons/pi";
+import type useRRuleSet from "~/hooks/useRRuleSet";
 import CustomRepeatingRule from "./CustomRepeatingRRule";
 
 interface Props {
-  startDay: Day;
-  time?: Time;
-  onChange?: (icalString: string | undefined) => void;
+  rruleSet: ReturnType<typeof useRRuleSet>;
 }
 
-export default function RepeatingRuleSelector({
-  startDay,
-  time,
-  onChange,
-}: Props) {
-  const state = useRRuleSet(startDay, time);
-
-  useEffect(() => {
-    onChange?.(state.rrule.icalString);
-  }, [state.rrule.icalString, onChange]);
-
+export default function RepeatingRuleSelector({ rruleSet: state }: Props) {
   return (
     <>
       <div className="grow">
@@ -65,7 +47,9 @@ export default function RepeatingRuleSelector({
                           className="group flex w-full items-center justify-between px-3 py-1 text-left transition-colors hover:bg-gray-200 data-[selected=true]:bg-sky-200"
                           data-selected={state.preset === key}
                           onClick={() =>
-                            state.setPreset(key as keyof typeof state.rrulePresets)
+                            state.setPreset(
+                              key as keyof typeof state.rrulePresets,
+                            )
                           }
                         >
                           {preset.description}

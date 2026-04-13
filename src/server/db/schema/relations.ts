@@ -146,6 +146,23 @@ const relations = defineRelations(tables, (r) => ({
       optional: false,
     }),
   },
+  uploads: {
+    owner: r.one.profiles({
+      from: r.uploads.ownerId,
+      to: r.profiles.id,
+    }),
+    attachedProfile: r.one.profiles({
+      from: [r.uploads.ownerId, r.uploads.contentHash],
+      to: [r.profiles.id, r.profiles.image],
+    }),
+    attachedPost: r.many.posts({
+      from: [
+        r.uploads.ownerId.through(r.postAttachments.ownerId),
+        r.uploads.contentHash.through(r.postAttachments.contentHash),
+      ],
+      to: r.posts.id.through(r.postAttachments.postId),
+    }),
+  },
 }));
 
 export default relations;

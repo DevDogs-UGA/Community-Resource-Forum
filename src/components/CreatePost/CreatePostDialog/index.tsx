@@ -30,7 +30,7 @@ export default function CreatePostDialog({
   orgsCanCreateEvent,
   events,
 }: Props) {
-  const { open, setOpen } = useCreatePostContext();
+  const { open, setOpen, defaultValue } = useCreatePostContext();
   const [selectedProfileId, setSelectedProfileId] = useState(userProfile.id);
   const selectedProfile = useMemo(
     () =>
@@ -69,19 +69,29 @@ export default function CreatePostDialog({
                     organizationProfiles={orgsCanCreatePost}
                     value={selectedProfileId}
                     onChange={setSelectedProfileId}
+                    defaultValue={defaultValue?.authorId}
                   />
                 </label>
 
-                <SelectTags inputName="tags" />
-                <ContentEditor />
+                <SelectTags
+                  inputName="tags"
+                  defaultValue={defaultValue?.tags}
+                />
+                
+                <ContentEditor defaultValue={defaultValue?.content} />
 
                 <SelectEvent
                   events={events}
                   userProfile={userProfile}
                   organizationProfiles={orgsCanCreateEvent}
+                  defaultValue={defaultValue?.event}
                 />
 
-                <SelectAttachments profile={selectedProfile} multiple />
+                <SelectAttachments
+                  profile={selectedProfile}
+                  defaultValue={defaultValue?.attachments}
+                  multiple
+                />
 
                 <button className="mt-2 flex items-center gap-3 rounded-sm border-b-2 border-sky-900 bg-sky-800 px-6 py-1 text-lg font-medium text-white shadow-sm ring-1 ring-sky-950 transition-colors hover:bg-sky-50 hover:text-sky-800 focus:mt-0.5 focus:border-b-0">
                   <span className="contents">

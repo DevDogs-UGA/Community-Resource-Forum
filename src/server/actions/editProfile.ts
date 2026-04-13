@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { expectSession } from "~/server/auth";
 import { db } from "~/server/db";
 import { profiles } from "~/server/db/schema/tables";
+import { hasPermissions } from "../db/permissions";
 
 export default async function editProfile(formData: FormData) {
   const session = await expectSession({
@@ -17,13 +18,12 @@ export default async function editProfile(formData: FormData) {
             events: true,
           },
         },
-        organizationOwnerships: {
+        organizationPermissions: {
+          where: {
+            RAW: hasPermissions("EDIT_PROFILE"),
+          },
           with: {
-            profile: {
-              with: {
-                events: true,
-              },
-            },
+            profile: true,
           },
         },
       },
@@ -33,7 +33,6 @@ export default async function editProfile(formData: FormData) {
   const id = formData.get("id");
   const name = formData.get("name");
   const bio = formData.get("bio");
-  const image = formData.get("image");
   const linkedin = formData.get("linkedin");
   const github = formData.get("github");
   const personalSite = formData.get("personalSite");
@@ -42,9 +41,9 @@ export default async function editProfile(formData: FormData) {
     session &&
     (id === session.userProfileId
       ? session.user.profile
-      : session.user.organizationOwnerships.find(
+      : session.user.organizationPermissions.find(
           (org) => org.organizationProfileId === id,
-        )?.profile.events);
+        )?.profile);
 
   if (!profile || !id || typeof id !== "string") {
     throw new Error("Invalid profile ID.");
@@ -54,7 +53,6 @@ export default async function editProfile(formData: FormData) {
 
   if (typeof name === "string") updates.name = name;
   if (typeof bio === "string") updates.bio = bio;
-  if (typeof image === "string") updates.image = image;
   if (typeof personalSite === "string" && personalSite.length <= 255)
     updates.personalSite = personalSite;
 

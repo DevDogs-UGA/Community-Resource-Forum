@@ -18,7 +18,7 @@ export default function CustomRepeatingRule({
   rrule: { getRecurrences },
 }: CustomRRuleState) {
   const startDatetime = useMemo(
-    () => options.startDay.toLocalDatetime(options.time),
+    () => options.startDay.toLocalDatetime(options.startTime),
     [options],
   );
 

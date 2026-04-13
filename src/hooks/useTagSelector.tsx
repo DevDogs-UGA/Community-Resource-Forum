@@ -7,7 +7,7 @@ import {
   useContext,
   useMemo,
   useState,
-  type PropsWithChildren,
+  type PropsWithChildren
 } from "react";
 import type { tags as tagsTable } from "~/server/db/schema/tables";
 import { isAncestor, reduceTags, type Tag } from "../lib/tags";
@@ -40,7 +40,7 @@ interface Queried {
  * @param tags
  * @returns
  */
-export default function useTagSelector() {
+export default function useTagSelector(defaultValue?: string[]) {
   const context = useContext(TagsContext);
 
   if (!context) {
@@ -56,7 +56,12 @@ export default function useTagSelector() {
   );
 
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<Tag[]>([]);
+  const [selected, setSelected] = useState<Tag[]>(
+    () =>
+      defaultValue
+        ?.map((id) => tags.find((tag) => tag.id === id))
+        .filter((t) => t !== undefined) ?? [],
+  );
 
   const deselect = useCallback((tag: Tag) => {
     setSelected((s) => s.filter((other) => tag.id !== other.id));
@@ -77,7 +82,6 @@ export default function useTagSelector() {
       reduceTags(selected).map((tag) => ({
         tag,
         deselect: () => {
-          console.log("deselect", tag);
           deselect(tag);
         },
       })),

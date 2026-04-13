@@ -7,10 +7,11 @@ import useTagSelector from "~/hooks/useTagSelector";
 
 interface Props {
   inputName: string;
+  defaultValue?: string[];
 }
 
-export default function SelectTags({ inputName }: Props) {
-  const { query, setQuery, queried, selected } = useTagSelector();
+export default function SelectTags({ inputName, defaultValue }: Props) {
+  const { query, setQuery, queried, selected } = useTagSelector(defaultValue);
   const id = useId();
 
   return (

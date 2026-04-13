@@ -2,7 +2,7 @@
 
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { getDate } from "date-fns";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useId, useState, type ComponentProps } from "react";
 import {
   PiArrowCounterClockwiseBold,
   PiCalendarBlank,
@@ -14,36 +14,65 @@ import {
   PiPlusBold,
   PiTextTBold,
   PiUsersBold,
+  PiXBold,
 } from "react-icons/pi";
 import * as Combobox from "~/components/Combobox";
 import formatEventTime from "~/lib/formatEventTime";
 import type { events, profiles } from "~/server/db/schema/tables";
 import SelectProfile from "~/components/SelectProfile";
-import SelectDateTimeRange from "./SelectDateTimeRange";
+import SelectDateTimeRange from "../../../SelectDateTimeRange";
 import SelectTags from "../SelectTags";
+import AttachmentBadge from "~/components/AttachmentBadge";
 
 type Event = (typeof events)["$inferSelect"];
 type Profile = (typeof profiles)["$inferSelect"];
+
+type DefaultValue =
+  | {
+      id: string;
+    }
+  | ({
+      organizerId?: string;
+      title?: string;
+      location?: string;
+    } & ComponentProps<typeof SelectDateTimeRange>["defaultValue"]);
 
 interface Props {
   events: Event[];
   userProfile: Profile;
   organizationProfiles: Profile[];
+  defaultValue?: DefaultValue;
 }
 
 export default function SelectEvent({
   events,
   userProfile,
   organizationProfiles,
+  defaultValue,
 }: Props) {
   const [query, setQuery] = useState("");
-  const [value, setValue] = useState<Event | null>(null);
-  const [createNew, setCreateNew] = useState<boolean>(false);
   const id = useId();
+
+  const [createNew, setCreateNew] = useState<boolean>(
+    () => defaultValue !== undefined && !("id" in defaultValue),
+  );
+
+  const [value, setValue] = useState<Event | null>(
+    () =>
+      (defaultValue &&
+        "id" in defaultValue &&
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        events.find((event) => event.id === defaultValue.id)) ||
+      null,
+  );
 
   const filteredEvents = events.filter((event) =>
     event.title.toLowerCase().includes(query.toLowerCase()),
   );
+
+  const removeSelection = useCallback(() => {
+    setValue(null);
+  }, []);
 
   const updateSelection = useCallback((event: Event | null) => {
     if (event) {
@@ -62,7 +91,19 @@ export default function SelectEvent({
         <PiCalendarBold /> Include Event
       </label>
 
-      <input type="hidden" name="event.id" value={value?.id ?? ""} readOnly />
+      {!createNew && value && (
+        <div className="flex items-center gap-1.5">
+          <input type="hidden" name="event.id" value={value.id} readOnly />
+          <button
+            type="button"
+            className="aspect-square rounded-full p-1.5 text-sm text-red-900/70 transition-colors hover:bg-red-500/20 hover:text-red-800"
+            onClick={removeSelection}
+          >
+            <PiXBold />
+          </button>
+          <AttachmentBadge event={value} preview />
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
         <Combobox.Root popover>
@@ -92,7 +133,7 @@ export default function SelectEvent({
               {filteredEvents.map((event) => (
                 <Combobox.Option
                   key={event.id}
-                  className="group flex cursor-default items-center gap-2 rounded-sm px-3 py-1.5 select-none data-focus:bg-black/10"
+                  className="group flex cursor-default w-full items-center gap-2 rounded-sm px-3 py-1.5 select-none data-focus:bg-black/10"
                   onClick={() => updateSelection(event)}
                 >
                   <div className="flex flex-1 items-center gap-3 py-0.5 text-xl text-black">
@@ -102,7 +143,7 @@ export default function SelectEvent({
                         {getDate(event.start)}
                       </span>
                     </span>
-                    <span className="flex flex-col gap-0.5">
+                    <span className="flex flex-col gap-0.5 text-left">
                       <span className="text-sm/[1]">{event.title}</span>
                       <span className="text-[0.6rem]/[1] font-bold text-gray-600">
                         {formatEventTime(event)}
@@ -139,6 +180,11 @@ export default function SelectEvent({
               inputName="event.organizerId"
               userProfile={userProfile}
               organizationProfiles={organizationProfiles}
+              defaultValue={
+                defaultValue && !("id" in defaultValue)
+                  ? defaultValue.organizerId
+                  : undefined
+              }
             />
           </div>
 
@@ -154,7 +200,13 @@ export default function SelectEvent({
                 endDay: "event.endDay",
                 endTime: "event.endTime",
                 allDay: "event.allDay",
+                rruleSet: "event.rrule",
               }}
+              defaultValue={
+                defaultValue && !("id" in defaultValue)
+                  ? defaultValue
+                  : undefined
+              }
             />
           </div>
 
@@ -169,6 +221,11 @@ export default function SelectEvent({
                 name="event.title"
                 placeholder="My Awesome Event"
                 type="text"
+                defaultValue={
+                  defaultValue && !("id" in defaultValue)
+                    ? defaultValue.title
+                    : undefined
+                }
                 required
               />
             </span>
@@ -186,6 +243,11 @@ export default function SelectEvent({
                 className="w-full rounded-sm bg-white px-3 py-1 ring ring-gray-400"
                 name="event.location"
                 placeholder="(optional)"
+                defaultValue={
+                  defaultValue && !("id" in defaultValue)
+                    ? defaultValue.location
+                    : undefined
+                }
               />
             </span>
           </label>

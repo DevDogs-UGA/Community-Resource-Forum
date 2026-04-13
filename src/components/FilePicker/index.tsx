@@ -5,21 +5,17 @@ import {
   useCallback,
   useEffect,
   useId,
+  useMemo,
   useState,
   useTransition,
   type ChangeEvent,
   type DragEvent,
   type PropsWithChildren,
 } from "react";
-import {
-  PiArrowSquareOutBold,
-  PiCheckBold,
-  PiCircleNotch,
-  PiFile,
-  PiUploadSimpleBold,
-  PiXBold,
-} from "react-icons/pi";
+import { PiCheckBold, PiCircleNotch, PiFile, PiXBold } from "react-icons/pi";
+import { MIMEType } from "whatwg-mimetype";
 import getFileDetails from "~/lib/getFileDetails";
+import zip from "~/lib/zip";
 import type { schema } from "~/server/db/schema";
 import type { FileDetails, UploadResult } from "~/server/s3";
 
@@ -35,16 +31,17 @@ interface Option extends FileDetails {
   selected: boolean;
 }
 
-interface Props {
+interface Props extends PropsWithChildren {
   profile: ProfileWithUploads;
   multiple?: boolean;
   allowTypes?: string[];
+  defaultValue?: string[];
   getPresignedUrls: (
     ownerId: string,
     fileDetails: FileDetails[],
   ) => Promise<UploadResult>;
-  value: string[];
-  onChange: (value: string[]) => void;
+  value: FileDetails[];
+  onChange: (value: FileDetails[]) => void;
 }
 
 export default function FilePicker({
@@ -52,18 +49,21 @@ export default function FilePicker({
   onChange,
   multiple = false,
   getPresignedUrls,
-  allowTypes = [],
+  allowTypes,
+  defaultValue,
+  children,
 }: Props) {
   const id = useId();
   const [open, setOpen] = useState(false);
   const [triggerDragOver, setTriggerDragOver] = useState(false);
   const [inputDragOver, setInputDragOver] = useState(false);
   const [_, startTransition] = useTransition();
+
   const [options, setOptions] = useState<Option[]>(() =>
     profile.uploads.map((f) => ({
       ...f,
       uploadPending: false,
-      selected: false,
+      selected: !!defaultValue?.includes(f.contentHash),
     })),
   );
 
@@ -91,13 +91,13 @@ export default function FilePicker({
     (files: File[]) => {
       startTransition(async () => {
         const details = (
-          await Promise.all(files.map((file) => getFileDetails(file)))
+          await Promise.all(
+            files.map((file) => getFileDetails(file, profile.id)),
+          )
         ).filter((file) => {
           if (options.every((opt) => opt.contentHash !== file.contentHash)) {
             return true;
           }
-
-          console.log("dupe!");
 
           setOptions((opt) =>
             opt.map((f) =>
@@ -109,34 +109,38 @@ export default function FilePicker({
         });
 
         const presignedUrls = await getPresignedUrls(profile.id, details);
+        console.log({files, presignedUrls});
 
         await Promise.all(
-          presignedUrls.map(async ({ presignedUrl, ...file }) => {
-            setOptions((opt) => [
-              { ...file, uploadPending: true, selected: false },
-              ...opt,
-            ]);
+          zip(files, presignedUrls).map(
+            async ([file, { presignedUrl, ...details }]) => {
+              setOptions((opt) => [
+                { ...details, uploadPending: true, selected: false },
+                ...opt,
+              ]);
 
-            const result = await fetch(presignedUrl, {
-              method: "PUT",
-              headers: { ContentType: file.type },
-            });
+              const result = await fetch(presignedUrl, {
+                method: "PUT",
+                headers: { ContentType: details.type },
+                body: file,
+              });
 
-            if (!result.ok) {
+              if (!result.ok) {
+                setOptions((opt) =>
+                  opt.filter((f) => f.contentHash !== details.contentHash),
+                );
+                return;
+              }
+
               setOptions((opt) =>
-                opt.filter((f) => f.contentHash !== file.contentHash),
+                opt.map((f) =>
+                  f.contentHash === details.contentHash
+                    ? { ...f, uploadPending: false, selected: true }
+                    : f,
+                ),
               );
-              return;
-            }
-
-            setOptions((opt) =>
-              opt.map((f) =>
-                f.contentHash === file.contentHash
-                  ? { ...f, uploadPending: false, selected: true }
-                  : f,
-              ),
-            );
-          }),
+            },
+          ),
         );
       });
     },
@@ -169,58 +173,76 @@ export default function FilePicker({
     [handleDrop],
   );
 
-  const createSelectionChangeHandler = useCallback((contentHash: string) => {
-    return (e: ChangeEvent<HTMLInputElement>) => {
-      const checked = e.currentTarget.checked;
-      setOptions((opt) =>
-        opt.map((f) =>
-          f.contentHash === contentHash
-            ? {
-                ...f,
-                selected: !f.uploadPending && checked,
-              }
-            : f,
-        ),
-      );
-    };
+  const createSelectionChangeHandler = useCallback(
+    (contentHash: string) => {
+      return (e: ChangeEvent<HTMLInputElement>) => {
+        const checked = e.currentTarget.checked;
+
+        if (multiple) {
+          setOptions((opt) =>
+            opt.map((f) =>
+              f.contentHash === contentHash
+                ? {
+                    ...f,
+                    selected: !f.uploadPending && checked,
+                  }
+                : f,
+            ),
+          );
+        } else {
+          setOptions((opt) =>
+            opt.map((f) => ({
+              ...f,
+              selected:
+                !f.uploadPending && f.contentHash === contentHash && checked,
+            })),
+          );
+        }
+      };
+    },
+    [multiple],
+  );
+
+  const allowedMimeTypes = useMemo(
+    () => allowTypes?.map((type) => new MIMEType(type)),
+    [allowTypes],
+  );
+
+  const isAllowedType = useCallback((opt: Option) => {
+    if (!allowedMimeTypes) {
+      return true;
+    }
+
+    const { type, subtype } = new MIMEType(opt.type);
+
+    for (const allowedType of allowedMimeTypes) {
+      if (
+        (allowedType.type === "*" || allowedType.type === type) &&
+        allowedType.subtype === "*" &&
+        allowedType.subtype === subtype
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }, []);
 
   useEffect(() => {
-    onChange(options.filter((f) => f.selected).map((f) => f.contentHash));
+    onChange(options.filter((f) => f.selected));
   }, [onChange, options]);
-
-  // const handleChange = useCallback(
-  //   (e: ChangeEvent<HTMLInputElement>) => {
-  //     if (e.currentTarget.files) {
-  //       prepareFiles(Array.from(e.currentTarget.files));
-  //     }
-  //   },
-  //   [prepareFiles],
-  // );
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger asChild>
-        <button
-          className="group flex w-full flex-col items-center justify-center gap-1.5 rounded-sm border border-dashed border-gray-400 bg-white py-3 text-sm font-medium text-gray-800 data-drag-over:border-solid data-drag-over:border-sky-600 data-drag-over:shadow-md"
-          onDragEnter={handleTriggerDragEnter}
-          onDragLeave={handleTriggerDragLeave}
-          onDragOver={handleDragOver}
-          onDrop={handleTriggerDrop}
-          data-drag-over={triggerDragOver || undefined}
-          type="button"
-        >
-          <span className="pointer-events-none flex items-center justify-center gap-2 group-hover:text-gray-500 group-data-drag-over:text-black">
-            <PiUploadSimpleBold />
-            Drag File Here
-          </span>
-          <span className="pointer-events-none text-[0.66rem] text-gray-500 uppercase">
-            Or
-          </span>
-          <span className="pointer-events-none flex items-center justify-center gap-2 group-hover:text-black group-data-drag-over:text-gray-500">
-            Click to Select from Previous Uploads <PiArrowSquareOutBold />
-          </span>
-        </button>
+      <Dialog.Trigger
+        data-drag-over={triggerDragOver || undefined}
+        onDragEnter={handleTriggerDragEnter}
+        onDragLeave={handleTriggerDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleTriggerDrop}
+        asChild
+      >
+        {children}
       </Dialog.Trigger>
 
       <Dialog.Portal>
@@ -239,7 +261,7 @@ export default function FilePicker({
 
             <div className="grid grid-cols-3">
               <div className="bg-scroll-shadow col-span-2 grid h-max max-h-64 grid-cols-subgrid grid-rows-[repeat(auto-fill,1fr)] gap-2 overflow-y-scroll px-4 py-1.5">
-                {options.map((file) => (
+                {options.filter(isAllowedType).map((file) => (
                   <label
                     className="checked:border-blue relative flex items-center gap-1.5 rounded-sm border border-gray-200 bg-gray-50 px-2 py-1.5 text-sm text-gray-800 transition-[box-shadow,border-color,background-color,text-color] hover:border-gray-300 hover:shadow-xs has-checked:border-sky-600 has-checked:bg-sky-100 has-checked:text-black"
                     key={file.contentHash}
@@ -247,7 +269,7 @@ export default function FilePicker({
                     <input
                       className="peer hidden"
                       name={id}
-                      type={multiple ? "checkbox" : "radio"}
+                      type="checkbox"
                       checked={file.selected}
                       onChange={createSelectionChangeHandler(file.contentHash)}
                       disabled={file.uploadPending}
@@ -258,7 +280,7 @@ export default function FilePicker({
                     <span className="w-full grow overflow-hidden overflow-ellipsis whitespace-nowrap">
                       {file.name}
                     </span>
-                    <span className="peer-disabled:block hidden text-gray-500">
+                    <span className="hidden text-gray-500 peer-disabled:block">
                       <PiCircleNotch className="animate-spin" />
                     </span>
                     <span className="pointer-events-none absolute right-0 bottom-0 block aspect-square translate-1 rounded-full bg-sky-600 p-px text-[0.66rem] text-white opacity-0 transition-opacity peer-checked:opacity-100">
@@ -280,7 +302,7 @@ export default function FilePicker({
                     className="hidden"
                     type="file"
                     onChange={handleFileInputChange}
-                    accept={allowTypes.join(",")}
+                    accept={allowTypes?.join(",")}
                     multiple={multiple}
                   />
                   Drag or click here to upload a new file

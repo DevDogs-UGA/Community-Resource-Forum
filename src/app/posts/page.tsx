@@ -28,7 +28,6 @@ export default async function HomePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await getSession({});
   const tagParam = await searchParams.then((s) => {
     if ("t" in s && s.t !== undefined) {
       return s.t instanceof Array ? s.t : [s.t];
@@ -129,12 +128,77 @@ export default async function HomePage({
       ),
     );
 
+  const { posts, tags } = await db.transaction(async (tx) => {
+    const session = await getSession(
+      {
+        user: {
+          columns: {},
+          with: {
+            organizationPermissions: {
+              columns: {
+                organizationProfileId: true,
+                rank: true,
+              },
+            },
+          },
+        },
+      },
+      tx,
+    );
+
+    const tags =
+      tagParam.length > 0
+        ? await tx.query.tags.findMany({
+            where: { OR: tagParam.map((tag) => ({ id: tag })) },
+          })
+        : [];
+
+    const posts = await tx.query.posts.findMany({
+      limit: 20,
+      where: {
+        AND: [
+          {
+            quarantined: false,
+            OR: [
+              {
+                accessRank: { isNull: true },
+              },
+              ...(session?.user.organizationPermissions.map((org) => ({
+                authorId: org.organizationProfileId,
+                accessRank: { gte: org.rank },
+              })) ?? []),
+            ],
+          },
+          ...tags.map((tag) => ({
+            tags: {
+              lft: { gte: tag.lft, lte: tag.rgt },
+            },
+          })),
+        ],
+      },
+      with: {
+        author: true,
+        event: true,
+        votes: {
+          limit: 1,
+          where: {
+            userProfileId: session?.userProfileId,
+          },
+        },
+        tags: true,
+        attachments: true,
+      },
+    });
+
+    return { posts, tags };
+  });
+
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-8">
-      {tagsResult.length > 0 && (
+      {tags.length > 0 && (
         <h1 className="flex flex-wrap items-center gap-1.5">
           Showing{" "}
-          {tagsResult.map((tag) => (
+          {tags.map((tag) => (
             <span
               key={tag.id}
               className="flex overflow-hidden rounded-sm border border-sky-800 shadow-xs"
@@ -148,23 +212,23 @@ export default async function HomePage({
         </h1>
       )}
 
-      {Array.from(postsResult.values()).map(
-        ({ post, author, event, vote, tags }) => (
-          <div
-            className="overflow-hidden rounded-md border border-gray-300"
-            key={post.id}
-          >
-            <Post
-              post={post}
-              author={author}
-              event={event}
-              vote={vote}
-              tags={Array.from(tags.values())}
-            />
-          </div>
-        ),
-      )}
-      {postsResult.size === 0 && (
+      {posts.map(({ author, event, votes, tags, attachments, ...post }) => (
+        <div
+          className="overflow-hidden rounded-md border border-gray-300"
+          key={post.id}
+        >
+          <Post
+            post={post}
+            author={author}
+            event={event}
+            vote={votes[0]}
+            attachments={attachments}
+            tags={tags}
+            tagParam={tagParam}
+          />
+        </div>
+      ))}
+      {posts.length === 0 && (
         <p className="max-w-prose text-center text-sm text-gray-600">
           There aren&rsquo;t any posts to display yet. Try signing in and
           publishing some!

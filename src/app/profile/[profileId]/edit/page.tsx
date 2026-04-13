@@ -1,42 +1,48 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import UploadProfilePhoto from "~/components/UploadProfilePhoto";
-import FileUploadForm from "~/components/FileUploadForm";
+import FilePicker from "~/components/FilePicker";
 import editProfile from "~/server/actions/editProfile";
 import { expectSession } from "~/server/auth";
+import { hasPermissions } from "~/server/db/permissions";
 
 //This is the form field page where users are redirected to to edit their profiles.
 
 export default async function EditProfilePage({
   params,
-}: {
-  params: Promise<{ profileId: string }>;
-}) {
+}: PageProps<`/profile/[profileId]`>) {
+  const { profileId } = await params;
   const session = await expectSession({
     user: {
+      columns: {},
       with: {
         profile: {
+          where: {
+            id: profileId,
+          },
           with: {
-            events: true,
+            uploads: true,
           },
         },
-        organizationOwnerships: {
+        organizationPermissions: {
+          limit: 1,
+          where: {
+            organizationProfileId: profileId,
+            RAW: hasPermissions("EDIT_PROFILE"),
+          },
           with: {
-            profile: true,
+            profile: {
+              with: {
+                uploads: true,
+              },
+            },
           },
         },
       },
     },
   });
-  const { profileId } = await params;
 
   const profile =
-    session &&
-    (profileId === session.userProfileId
-      ? session.user.profile
-      : session.user.organizationOwnerships.find(
-          (org) => org.organizationProfileId === profileId,
-        )?.profile);
+    session.user.profile ?? session.user.organizationPermissions[0]?.profile;
 
   if (!profile) {
     notFound();
@@ -45,25 +51,8 @@ export default async function EditProfilePage({
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
       <h1 className="mb-6 text-2xl font-semibold">Edit Profile</h1>
-      <FileUploadForm
-        action={editProfile}
-        fileInputs={{
-          image: { ownerId: profileId, tag: "profileImage" },
-        }}
-        className="space-y-4"
-      >
+      <form action={editProfile} className="space-y-4">
         <input type="hidden" name="id" defaultValue={profile.id} />
-        <div>
-          <label className="block text-sm font-medium">
-            Replace Profile Photo
-          </label>
-          <label className="flex items-center gap-4 rounded-md border border-zinc-300 bg-white px-2 py-2 shadow-xs transition-[border-color,box-shadow] hover:border-zinc-400 hover:shadow-sm">
-            {/* <span className="text-5xl/0">
-              <Avatar {...profile} image={state?.status === "success" ? `/_uploads/${state?.data.uploadId}` : profile.image} />
-            </span> */}
-            <input name="image" type="file" />
-          </label>
-        </div>
         <div>
           <label className="block text-sm font-medium">Name</label>
           <input
@@ -119,7 +108,7 @@ export default async function EditProfilePage({
             Cancel
           </Link>
         </div>
-      </FileUploadForm>
+      </form>
     </div>
   );
 }

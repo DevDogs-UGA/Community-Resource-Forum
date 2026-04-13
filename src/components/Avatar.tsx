@@ -1,12 +1,12 @@
-import { Fallback, Image as AvatarImage, Root } from "@radix-ui/react-avatar";
-import Image, { getImageProps } from "next/image";
+import { Image as AvatarImage, Fallback, Root } from "@radix-ui/react-avatar";
+import { getImageProps } from "next/image";
 import type { profiles } from "~/server/db/schema/tables";
 
 export default function Avatar(profile: (typeof profiles)["$inferSelect"]) {
   const imageProps = profile.image
     ? getImageProps({
         alt: profile.name ?? "The current signed-in user",
-        src: `/_uploads/${profile.image}`,
+        src: `/uploads/${profile.id}/${profile.image}`,
         height: 128,
         width: 128,
       })

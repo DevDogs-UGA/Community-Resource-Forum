@@ -5,13 +5,27 @@ import {
   useCallback,
   useContext,
   useState,
+  type ComponentProps,
   type Dispatch,
   type PropsWithChildren,
-  type SetStateAction
+  type SetStateAction,
 } from "react";
+import type SelectProfile from "../SelectProfile";
+import type ContentEditor from "./CreatePostDialog/ContentEditor";
+import type SelectAttachments from "./CreatePostDialog/SelectAttachments";
+import type SelectEvent from "./CreatePostDialog/SelectEvent";
+import type SelectTags from "./CreatePostDialog/SelectTags";
+
+interface DefaultValue {
+  authorId?: ComponentProps<typeof SelectProfile>["defaultValue"];
+  tags?: ComponentProps<typeof SelectTags>["defaultValue"];
+  content?: ComponentProps<typeof ContentEditor>["defaultValue"];
+  attachments?: ComponentProps<typeof SelectAttachments>["defaultValue"];
+  event?: ComponentProps<typeof SelectEvent>["defaultValue"];
+}
 
 interface PostContext {
-  defaultValue: unknown;
+  defaultValue: DefaultValue | undefined;
   setDefaultValue: Dispatch<SetStateAction<PostContext["defaultValue"]>>;
   open: boolean;
   setOpen: Dispatch<SetStateAction<PostContext["open"]>>;

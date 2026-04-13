@@ -3,6 +3,7 @@ import { sql, type SQL } from "drizzle-orm";
 import {
   foreignKey,
   index,
+  MySqlColumn,
   mysqlEnum,
   mysqlTable,
   primaryKey,
@@ -96,7 +97,7 @@ export const postAttachments = mysqlTable(
       .references(() => posts.id),
   }),
   (t) => [
-    primaryKey({ columns: [t.ownerId, t.contentHash] }),
+    primaryKey({ columns: [t.ownerId, t.contentHash, t.postId] }),
     foreignKey({
       columns: [t.ownerId, t.contentHash],
       foreignColumns: [uploads.ownerId, uploads.contentHash],
@@ -225,17 +226,27 @@ export const eventTags = mysqlTable(
   (t) => [primaryKey({ columns: [t.eventId, t.tagId] })],
 );
 
-export const profiles = mysqlTable("profile", (d) => ({
-  id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
-  type: d.mysqlEnum(["user", "organization"]).notNull(),
-  name: d.varchar({ length: 255 }).notNull(),
-  bio: d.text({}),
-  linkedin: d.varchar({ length: 255 }),
-  github: d.varchar({ length: 255 }),
-  personalSite: d.varchar({ length: 255 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").onUpdateNow(),
-}));
+export const profiles = mysqlTable(
+  "profile",
+  (d) => ({
+    id: d.varchar({ length: 255 }).primaryKey().$defaultFn(createId),
+    image: d.varchar({ length: 255 }),
+    type: d.mysqlEnum(["user", "organization"]).notNull(),
+    name: d.varchar({ length: 255 }).notNull(),
+    bio: d.text({}),
+    linkedin: d.varchar({ length: 255 }),
+    github: d.varchar({ length: 255 }),
+    personalSite: d.varchar({ length: 255 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").onUpdateNow(),
+  }),
+  (t) => [
+    foreignKey({
+      columns: [t.id, t.image],
+      foreignColumns: [uploads.ownerId, uploads.contentHash],
+    }),
+  ],
+);
 
 export const users = mysqlTable(
   "user",
@@ -352,7 +363,7 @@ export const uploads = mysqlTable(
     ownerId: d
       .varchar({ length: 255 })
       .notNull()
-      .references(() => profiles.id),
+      .references((): MySqlColumn => profiles.id),
     contentHash: d.varchar({ length: 255 }).notNull(),
     bucket: d.varchar({ length: 255 }).notNull(),
     name: d.varchar({ length: 255 }).notNull(),

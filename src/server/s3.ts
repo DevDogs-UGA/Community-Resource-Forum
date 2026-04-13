@@ -2,7 +2,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { MIMEType } from "whatwg-mimetype";
 import { env } from "~/env";
-import { db } from "./db";
+import type { db } from "./db";
 import { schema } from "./db/schema";
 
 export const s3 = new S3Client({
@@ -29,6 +29,7 @@ export interface FileDetails {
   name: string;
   size: number;
   type: string;
+  ownerId: string;
   contentHash: string;
 }
 

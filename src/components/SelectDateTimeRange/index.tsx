@@ -1,6 +1,12 @@
 "use client";
 
-import { addMinutes, differenceInMinutes, isSameDay } from "date-fns";
+import {
+  addHours,
+  addMinutes,
+  differenceInMinutes,
+  isSameDay,
+  roundToNearestMinutes,
+} from "date-fns";
 import {
   useCallback,
   useMemo,
@@ -9,45 +15,64 @@ import {
   type SetStateAction,
 } from "react";
 import "react-day-picker/style.css";
-import { Day, Time } from "~/lib/Day";
 import useNow from "~/hooks/useNow";
+import useRRuleSet from "~/hooks/useRRuleSet";
+import { Day, Time } from "~/lib/Day";
 import DayInput from "./DayInput";
 import RepeatingRuleSelector from "./RepeatingRuleSelector";
 import TimeInput from "./TimeInput";
 
-interface DateTimeRange {
+type DateTimeRange = {
   allDay: boolean;
   startDay: Day;
   endDay: Day;
   startTime: Time;
   endTime: Time;
-}
+};
 
 interface Props {
-  inputNames: {
-    startDay: string;
-    startTime: string;
-    endDay: string;
-    endTime: string;
-    allDay: string;
-  };
+  inputNames: Record<keyof DateTimeRange, string> & { rruleSet: string };
+  defaultValue?: {
+    startDay?: Day;
+    endDay?: Day;
+    rruleSet?: Exclude<
+      Parameters<typeof useRRuleSet>[0],
+      "startDay" | "startTime"
+    >;
+  } & ({ allDay?: true } | { allDay: false; startTime?: Time; endTime?: Time });
 }
 
-export default function SelectDateTimeRange({ inputNames }: Props) {
+export default function SelectDateTimeRange({
+  inputNames,
+  defaultValue,
+}: Props) {
   const now = useNow("everyMinute");
 
-  const [dateTimeRange, setDateTimeRange] = useState<DateTimeRange>({
-    allDay: false,
-    startDay: Day.fromLocal(now),
-    endDay: Day.fromLocal(now),
-    startTime: new Time(
-      now.getHours(),
-      (now.getMinutes() + 30 - (now.getMinutes() % 30)) % 60,
-    ),
-    endTime: new Time(
-      now.getHours() + 1,
-      (now.getMinutes() + 30 - (now.getMinutes() % 30)) % 60,
-    ),
+  const [dateTimeRange, setDateTimeRange] = useState<DateTimeRange>(() => {
+    const allDay = defaultValue?.allDay ?? false;
+    const startDay = defaultValue?.startDay ?? Day.fromLocal(now);
+    const endDay = defaultValue?.endDay ?? startDay;
+    const startTime =
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      (defaultValue?.allDay === false && defaultValue.startTime) ||
+      Time.from(
+        roundToNearestMinutes(now, {
+          nearestTo: 30,
+          roundingMethod: "ceil",
+        }),
+      );
+
+    const endTime =
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      (defaultValue?.allDay === false && defaultValue.endTime) ||
+      Time.from(
+        addHours(
+          roundToNearestMinutes(now, { nearestTo: 30, roundingMethod: "ceil" }),
+          1,
+        ),
+      );
+
+    return { allDay, startDay, endDay, startTime, endTime };
   });
 
   const setStartDay: Dispatch<SetStateAction<Day>> = useCallback((startDay) => {
@@ -141,6 +166,17 @@ export default function SelectDateTimeRange({ inputNames }: Props) {
     [dateTimeRange],
   );
 
+  const defaultRRuleSet = useMemo(
+    () => ({
+      ...defaultValue?.rruleSet,
+      startDay: dateTimeRange.startDay,
+      startTime: dateTimeRange.startTime,
+    }),
+    [defaultValue, dateTimeRange],
+  );
+
+  const rruleSet = useRRuleSet(defaultRRuleSet);
+
   return (
     <div className="relative mx-auto flex w-full max-w-xl flex-col gap-2">
       <div
@@ -217,7 +253,9 @@ export default function SelectDateTimeRange({ inputNames }: Props) {
           />
           <span>All day</span>
         </label>
-        <RepeatingRuleSelector startDay={dateTimeRange.startDay} />
+
+        <RepeatingRuleSelector rruleSet={rruleSet} />
+        <input type="hidden" name={inputNames.rruleSet} value={rruleSet.rrule.icalString} />
       </div>
     </div>
   );

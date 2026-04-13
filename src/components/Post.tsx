@@ -1,23 +1,24 @@
-import { formatDistanceToNowStrict, getDate } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
 import Link from "next/link";
 import {
-  PiCalendarBlank,
   PiChatCircleTextBold,
   PiHash,
-  PiShareFatBold,
+  PiShareFatBold
 } from "react-icons/pi";
 import Avatar from "~/components/Avatar";
 import ShareDropdown from "~/components/ShareDropdown";
 import VoteButton from "~/components/VoteButton";
-import formatEventTime from "~/lib/formatEventTime";
 import type * as tables from "~/server/db/schema/tables";
+import AttachmentBadge from "./AttachmentBadge";
 
 interface Props {
   post: typeof tables.posts.$inferSelect;
   author: typeof tables.profiles.$inferSelect;
-  event: typeof tables.events.$inferSelect | null;
+  event?: typeof tables.events.$inferSelect | null;
   tags: (typeof tables.tags.$inferSelect)[];
-  vote: typeof tables.postVotes.$inferSelect | null;
+  attachments: (typeof tables.postAttachments.$inferSelect)[];
+  vote?: typeof tables.postVotes.$inferSelect | null;
+  tagParam: string[];
   readonly?: boolean;
 }
 
@@ -27,6 +28,7 @@ export default function Post({
   event,
   vote,
   tags,
+  tagParam,
   readonly = false,
 }: Props) {
   return (
@@ -56,32 +58,7 @@ export default function Post({
           />
         )}
 
-        {event && (
-          <Link
-            className="mt-3 flex flex-1 items-center gap-3 rounded-sm border border-gray-300 bg-gray-50 px-2 py-1.5 text-xl text-black shadow-xs"
-            href={`/event/${post.eventId}`}
-          >
-            <span className="relative">
-              <PiCalendarBlank />
-              <span className="absolute inset-0 top-1/2 w-full -translate-y-1/2 pt-px text-center text-[0.55rem] font-bold">
-                {getDate(event.start)}
-              </span>
-            </span>
-
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="-mt-0.5 overflow-x-hidden text-sm/1.25 overflow-ellipsis">
-                {event.title}
-              </span>
-              <span className="text-[0.6rem]/[1] font-bold text-gray-600">
-                {formatEventTime(event)}
-              </span>
-            </span>
-
-            <button className="rounded-xs px-2 py-0.5 text-xs font-bold text-sky-800 uppercase ring-sky-800/50 hover:bg-sky-100 hover:ring">
-              RSVP
-            </button>
-          </Link>
-        )}
+        {event && <AttachmentBadge event={event} />}
       </div>
 
       <div className="flex flex-wrap items-center justify-start gap-y-1 pb-2 text-xs">
@@ -92,7 +69,7 @@ export default function Post({
             href={{
               pathname: "/",
               query: {
-                // t: tagParam.includes(tag.id) ? tagParam : [tag.id, ...tagParam],
+                t: tagParam.includes(tag.id) ? tagParam : [tag.id, ...tagParam],
               },
             }}
             target={readonly ? "_blank" : undefined}

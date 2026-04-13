@@ -17,6 +17,7 @@ import {
   PiTrendUp,
 } from "react-icons/pi";
 import * as z from "zod";
+import AttachmentBadge from "~/components/AttachmentBadge";
 import Avatar from "~/components/Avatar";
 import * as CommentEditor from "~/components/CommentEditor";
 import ShareDropdown from "~/components/ShareDropdown";
@@ -380,32 +381,7 @@ export default async function Page({
                 />
               )}
 
-              {post.event && (
-                <Link
-                  className="mt-3 flex flex-1 items-center gap-3 rounded-sm border border-gray-300 bg-gray-50 px-2 py-1.5 text-xl text-black shadow-xs"
-                  href={`/event/${post.eventId}`}
-                >
-                  <span className="relative">
-                    <PiCalendarBlank />
-                    <span className="absolute inset-0 top-1/2 w-full -translate-y-1/2 pt-px text-center text-[0.55rem] font-bold">
-                      {getDate(post.event.start)}
-                    </span>
-                  </span>
-
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="-mt-0.5 overflow-x-hidden text-sm/1.25 overflow-ellipsis">
-                      {post.event.title}
-                    </span>
-                    <span className="text-[0.6rem]/[1] font-bold text-gray-600">
-                      {formatEventTime(post.event)}
-                    </span>
-                  </span>
-
-                  <button className="rounded-xs px-2 py-0.5 text-xs font-bold text-sky-800 uppercase ring-sky-800/50 hover:bg-sky-100 hover:ring">
-                    RSVP
-                  </button>
-                </Link>
-              )}
+              {post.event && <AttachmentBadge event={post.event} />}
             </div>
 
             <div className="flex flex-wrap items-center justify-start gap-y-1 pb-2 text-xs">

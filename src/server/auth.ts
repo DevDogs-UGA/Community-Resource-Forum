@@ -26,14 +26,18 @@ export function authenticate(): never {
  */
 export async function getSession<
   T extends (Parameters<typeof db.query.sessions.findFirst>[0] & {})["with"],
->(include: T) {
+>(
+  include: T,
+  transaction?: Parameters<Parameters<typeof db.transaction>[0]>[0],
+) {
   const token = (await cookies()).get("session")?.value;
 
   if (!token) {
     return null;
   }
 
-  const session = await db.query.sessions.findFirst({
+  const tx = transaction ?? db;
+  const session = await tx.query.sessions.findFirst({
     where: {
       token: {
         eq: token,
@@ -52,14 +56,18 @@ export async function getSession<
  */
 export async function expectSession<
   T extends (Parameters<typeof db.query.sessions.findFirst>[0] & {})["with"],
->(include: T) {
+>(
+  include: T,
+  transaction?: Parameters<Parameters<typeof db.transaction>[0]>[0],
+) {
   const token = (await cookies()).get("session")?.value;
 
   if (!token) {
     authenticate();
   }
 
-  const session = await db.query.sessions.findFirst({
+  const tx = transaction ?? db;
+  const session = await tx.query.sessions.findFirst({
     where: {
       token: {
         eq: token,
