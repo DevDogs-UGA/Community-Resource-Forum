@@ -1,16 +1,42 @@
 {
   "Involvement": {
-    "Dev Dogs": {}
+    "Dev Dogs": {},
+    "Club Meeting": {},
+    "Volunteer Work": {},
+    "Hackathon": {},
+    "Campus Events": {}
   },
   "Career": {
-    "Internships": {},
-    "Full-time Jobs": {},
+    "Internship": {},
+    "Co-op": {},
+    "Full-time Roles": {},
     "Part-time Jobs": {},
-    "Co-ops": {}
+    "Paid Position": {},
+    "EOTD": {},
+    "Career Fair/Prep": {},
+    "Professional Development": {}
   },
   "Academics": {
     "Algorithms (CSCI 4470)": {},
     "Fall Semester": {},
-    "Spring Semester": {}
+    "Spring Semester": {},
+    "Study Abroad": {},
+    "Scholarships": {},
+    "Research": {},
+    "Lecture": {},
+    "Workshop": {},
+    "Academic Opportunities": {},
+    "Experiential Learning": {},
+    "Academic Support": {}
+  },
+  "Technology": {
+    "AI": {},
+    "ML": {},
+    "Cyber": {},
+    "API": {},
+    "Authentication": {},
+    "Front-end": {},
+    "Back-end": {},
+    "Engineering": {}
   }
 }

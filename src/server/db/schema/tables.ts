@@ -246,10 +246,35 @@ export const users = mysqlTable(
       .references(() => profiles.id),
     email: d.varchar({ length: 255 }).notNull(),
     role: d.mysqlEnum(["user", "moderator"]).notNull(),
+    onboardingCompleted: d.boolean().default(false).notNull(),
     createdAt: d.timestamp("created_at").defaultNow().notNull(),
     updatedAt: d.timestamp("updated_at").onUpdateNow(),
   }),
   (t) => [uniqueIndex("email_idx").on(lower(t.email))],
+);
+
+export const userInterests = mysqlTable(
+  "user_interest",
+  (d) => ({
+    userProfileId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => users.profileId, {
+        onUpdate: "cascade",
+        onDelete: "cascade",
+      }),
+    tagId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => tags.id, {
+        onUpdate: "cascade",
+        onDelete: "cascade",
+      }),
+    weight: d.decimal({ precision: 3, scale: 2 }).notNull().default("1.00"),
+    createdAt: d.timestamp().defaultNow().notNull(),
+    updated: d.timestamp().onUpdateNow(),
+  }),
+  (t) => [primaryKey({ columns: [t.userProfileId, t.tagId] })],
 );
 
 export const permissionGroups = mysqlTable(

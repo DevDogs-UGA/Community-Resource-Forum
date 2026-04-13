@@ -1,4 +1,4 @@
-import { and, between, desc, eq, or, sum } from "drizzle-orm";
+import { and, between, desc, eq, or, sql, sum } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
 import { PiXBold } from "react-icons/pi";
 import Post from "~/components/Post";
@@ -11,6 +11,7 @@ import {
   profiles,
   tags,
   postTags,
+  userInterests,
 } from "~/server/db/schema/tables";
 
 interface PostRelation {
@@ -19,6 +20,7 @@ interface PostRelation {
   event: typeof events.$inferSelect | null;
   vote: typeof postVotes.$inferSelect | null;
   tags: Map<string, typeof tags.$inferSelect>;
+  relevanceScore: number;
 }
 
 export default async function HomePage({
@@ -31,7 +33,6 @@ export default async function HomePage({
     if ("t" in s && s.t !== undefined) {
       return s.t instanceof Array ? s.t : [s.t];
     }
-
     return [];
   });
 
@@ -46,6 +47,7 @@ export default async function HomePage({
   const queriedTags = alias(tags, "queriedTags");
   const queriedTagRelations = alias(postTags, "queriedTagRelations");
 
+  // Query with recommendation scoring
   const postsResult = await db
     .select({
       post: posts,
@@ -53,20 +55,35 @@ export default async function HomePage({
       event: events,
       vote: postVotes,
       tag: tags,
+      // Calculate relevance score from user interests
+      relevanceScore: sql<string>`COALESCE(SUM(${userInterests.weight}), 0)`,
     })
     .from(posts)
     .where(eq(posts.quarantined, false))
     .leftJoin(queriedTagRelations, eq(queriedTagRelations.postId, posts.id))
     .leftJoin(queriedTags, eq(queriedTags.id, queriedTagRelations.tagId))
-    .groupBy(posts.id, tags.id)
-    .having(
-      and(
-        ...tagsResult.map((tag) =>
-          sum(between(queriedTags.lft, tag.lft, tag.rgt)),
-        ),
-      ),
+    .groupBy(
+      posts.id,
+      profiles.id,
+      events.id,
+      postVotes.postId,
+      postVotes.userProfileId,
+      tags.id,
     )
-    .orderBy(desc(posts.createdAt))
+    .having(
+      tagsResult.length > 0
+        ? and(
+            ...tagsResult.map((tag) =>
+              sum(between(queriedTags.lft, tag.lft, tag.rgt)),
+            ),
+          )
+        : undefined,
+    )
+    // Order by relevance score (personalized), then by date
+    .orderBy(
+      desc(sql`COALESCE(SUM(${userInterests.weight}), 0)`),
+      desc(posts.createdAt),
+    )
     .offset(0)
     .limit(20)
     .innerJoin(profiles, eq(profiles.id, posts.authorId))
@@ -80,42 +97,37 @@ export default async function HomePage({
         eq(postVotes.postId, posts.id),
       ),
     )
+    // Join user interests for relevance scoring
+    .leftJoin(
+      userInterests,
+      and(
+        eq(userInterests.tagId, postTags.tagId),
+        eq(userInterests.userProfileId, session?.userProfileId ?? ""),
+      ),
+    )
     .then((queryResponse) =>
-      queryResponse.reduce((results, { post, author, event, vote, tag }) => {
-        if (!results.has(post.id)) {
-          results.set(post.id, {
-            post,
-            author,
-            event,
-            vote,
-            tags: new Map(),
-          });
-        }
+      queryResponse.reduce(
+        (results, { post, author, event, vote, tag, relevanceScore }) => {
+          if (!results.has(post.id)) {
+            results.set(post.id, {
+              post,
+              author,
+              event,
+              vote,
+              tags: new Map(),
+              relevanceScore: parseFloat(relevanceScore) || 0,
+            });
+          }
 
-        if (tag) {
-          results.get(post.id)!.tags.set(tag.id, tag);
-        }
+          if (tag) {
+            results.get(post.id)!.tags.set(tag.id, tag);
+          }
 
-        return results;
-      }, new Map<string, PostRelation>()),
+          return results;
+        },
+        new Map<string, PostRelation>(),
+      ),
     );
-
-  // const posts = await db.query.posts.findMany({
-  //   limit: 20,
-  //   where: {
-  //     quarantined: false,
-  //   },
-  //   with: {
-  //     author: true,
-  //     tags: true,
-  //     event: true,
-  //     votes: {
-  //       where: {
-  //         userId: session?.userProfileId,
-  //       },
-  //     },
-  //   },
-  // });
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6 px-6 py-8">
