@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { FilterWindow } from "./FilterWindow";
+import type { FilterParams } from "./FilterWindow";
 
 interface Post {
   id: string;
@@ -18,16 +20,15 @@ interface SearchResponse {
 }
 
 export function SearchBar() {
+  const [showFilter, setShowFilter] = useState(false);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!query.trim()) {
+  const performSearch = async (searchQuery: string, filters?: FilterParams) => {
+    if (!searchQuery.trim()) {
       return;
     }
 
@@ -37,7 +38,23 @@ export function SearchBar() {
     setHasSearched(true);
 
     try {
-      const response = await fetch(`/api/search/${encodeURIComponent(query)}`);
+      const params = new URLSearchParams();
+      params.set("search", searchQuery);
+
+      if (filters) {
+        if (filters.startDate !== undefined)
+          params.set("startDate", filters.startDate);
+        if (filters.endDate !== undefined)
+          params.set("endDate", filters.endDate);
+        if (filters.flagged !== undefined)
+          params.set("flagged", String(filters.flagged));
+        if (filters.archived !== undefined)
+          params.set("archived", String(filters.archived));
+        if (filters.minComments !== undefined)
+          params.set("minComments", String(filters.minComments));
+      }
+
+      const response = await fetch(`/api/search?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error("Search failed");
@@ -50,6 +67,18 @@ export function SearchBar() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    performSearch(query);
+  };
+
+  const handleFilterApply = async (filters: FilterParams) => {
+    // Use search term from filter or fall back to current query
+    const searchQuery = filters.search || query;
+    setQuery(searchQuery);
+    performSearch(searchQuery, filters);
   };
 
   return (
@@ -90,7 +119,7 @@ export function SearchBar() {
             className="ml-1.5 flex cursor-pointer items-center border-none bg-transparent p-1 sm:ml-2" // Smaller margin on mobile
             onClick={(e) => {
               e.preventDefault();
-              // Add filter functionality here
+              setShowFilter(true);
             }}
           >
             <svg
@@ -122,6 +151,13 @@ export function SearchBar() {
           {isLoading ? "Searching..." : "Search"}
         </button>
       </form>
+
+      {showFilter && (
+        <FilterWindow
+          onClose={() => setShowFilter(false)}
+          onApply={handleFilterApply}
+        />
+      )}
 
       {error && (
         <div className="mb-5 rounded-md border border-red-300 bg-red-100 p-4 text-red-700">
