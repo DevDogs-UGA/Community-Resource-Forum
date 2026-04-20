@@ -13,6 +13,7 @@ import {
   type voteValue,
 } from "../db/schema/tables";
 import { increment } from "../db/utils";
+import { updateInterestsFromVote } from "./interests";
 
 export interface PrevState {
   score: number;
@@ -50,6 +51,7 @@ export default async function vote(prevState: PrevState, formData: FormData) {
           votesTable: postVotes,
           votesTableContentIdColumn: "postId",
           votesTableContentIdCondition: eq(postVotes.postId, data.postId),
+          isPost: true,
         }
       : {
           contentId: data.commentId,
@@ -60,9 +62,10 @@ export default async function vote(prevState: PrevState, formData: FormData) {
             commentVotes.commentId,
             data.commentId,
           ),
+          isPost: false,
         };
 
-  return await db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
     const [existingVote] = await tx
       .select()
       .from(target.votesTable)
@@ -132,6 +135,37 @@ export default async function vote(prevState: PrevState, formData: FormData) {
     return {
       score: prevState.score + calculateDelta("up") - calculateDelta("down"),
       value: newVote,
-    } satisfies PrevState;
+      existingVoteValue: existingVote?.value ?? null,
+      newVoteValue: newVote,
+    };
   });
+
+  // Update interest weights for posts only (not comments)
+  if (target.isPost) {
+    const wasUpvote = result.existingVoteValue === "up";
+
+    if (result.newVoteValue) {
+      // New vote or changed vote
+      const isUpvote = result.newVoteValue === "up";
+      const previousVoteWasUpvote = result.existingVoteValue ? wasUpvote : null;
+
+      await updateInterestsFromVote(
+        target.contentId,
+        isUpvote,
+        previousVoteWasUpvote,
+      );
+    } else if (result.existingVoteValue) {
+      // Removed vote - reverse the previous weight change
+      await updateInterestsFromVote(
+        target.contentId,
+        !wasUpvote,
+        null,
+      );
+    }
+  }
+
+  return {
+    score: result.score,
+    value: result.value,
+  } satisfies PrevState;
 }

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import FilePicker from "~/components/FilePicker";
+import { eq } from "drizzle-orm";
+import EditInterests from "~/components/EditInterests";
 import editProfile from "~/server/actions/editProfile";
+import { getUserInterests } from "~/server/actions/interests";
+import getAllTags from "~/server/actions/getAllTags";
 import { expectSession } from "~/server/auth";
 import { hasPermissions } from "~/server/db/permissions";
-
-//This is the form field page where users are redirected to to edit their profiles.
 
 export default async function EditProfilePage({
   params,
@@ -47,6 +48,12 @@ export default async function EditProfilePage({
   if (!profile) {
     notFound();
   }
+
+  // Fetch interests and tags (only for user profiles, not orgs)
+  const isUserProfile = profile.id === session.userProfileId;
+  const [interests, allTags] = isUserProfile
+    ? await Promise.all([getUserInterests(), getAllTags()])
+    : [[], []];
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
@@ -94,6 +101,14 @@ export default async function EditProfilePage({
             className="mt-1 block w-full rounded-md border px-3 py-2"
           />
         </div>
+
+        {/* Interests Section - only for user profiles */}
+        {isUserProfile && (
+          <div className="border-t pt-4">
+            <EditInterests currentInterests={interests} allTags={allTags} />
+          </div>
+        )}
+
         <div className="flex items-center gap-3">
           <button
             type="submit"
