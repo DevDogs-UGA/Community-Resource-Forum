@@ -1,5 +1,10 @@
 # Community-Resource-Forum
 
+> [!IMPORTANT]
+> **This repository is archived.** Active development has moved to the DevDogs monorepo at
+> [github.com/DevDogsUGA/DevDogsUGA](https://github.com/DevDogsUGA/DevDogsUGA). Please open new issues
+> and pull requests there. The code here is kept for historical reference only.
+
 DevDogs' 2025-2026 project: a community forum website for computer science students at UGA.
 
 ## Welcome to the DevDogs Community Resource Forum project!
